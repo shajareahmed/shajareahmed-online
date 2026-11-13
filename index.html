@@ -54,7 +54,31 @@ button:disabled{opacity:.55;cursor:default}
 .brand{display:flex;flex-direction:column;min-width:0}
 .brand b{font-family:var(--display);font-weight:700;font-size:17px;letter-spacing:.06em;color:var(--gold-deep);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .brand small{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.out{margin-left:auto;flex:none;border:1px solid var(--line);background:none;border-radius:999px;padding:6px 12px;font-size:12.5px;font-weight:700;color:var(--muted)}
+.bar{position:relative}
+.cbtn{margin-left:auto;flex:none;border:1.5px solid var(--gold);background:var(--paper);color:var(--gold-deep);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:700;min-height:36px}
+.cbtn.on{background:linear-gradient(180deg,var(--gold-hi),var(--gold));border-color:var(--gold-deep);color:#fff}
+.out{flex:none;border:1px solid var(--line);background:none;border-radius:50%;width:36px;height:36px;font-size:18px;font-weight:700;color:var(--muted);line-height:1}
+.menu{position:absolute;right:10px;top:calc(100% + 4px);z-index:30;background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 22px rgba(122,92,16,.2);display:flex;flex-direction:column;min-width:220px;overflow:hidden}
+.menu button{text-align:left;padding:12px 16px;border:0;border-bottom:1px solid var(--ivory);background:none;min-height:46px;font-weight:600}
+.node.sp{background:#FBF5E2}
+.row{border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:8px;background:var(--ivory)}
+.row b{display:block;overflow-wrap:anywhere}
+.row small{display:block;color:var(--muted);font-size:12.5px;overflow-wrap:anywhere}
+.row .acts{margin-top:8px;gap:6px}
+.row .btn{min-height:38px;padding:0 12px;font-size:13px}
+@media (max-width:480px){.brand small{display:none}.brand b{font-size:15px;letter-spacing:.04em;white-space:normal;line-height:1.1}.cbtn{padding:7px 11px}}
+#admin{position:absolute;inset:0;z-index:12;background:var(--ivory);overflow-y:auto;-webkit-overflow-scrolling:touch}
+.adm{max-width:760px;margin:0 auto;padding:16px 16px 48px}
+.admhead{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.admhead h2{font-size:22px}
+#admmsg{text-align:left;margin:6px 0 0}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px 16px 16px;margin-top:14px}
+.panel h3{margin-top:0}
+.panel .help{margin:0 0 10px}
+.linkbox{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.linkbox .field{flex:1 1 220px;height:42px;font-size:13px}
+a.btn{display:inline-flex;align-items:center;text-decoration:none}
+.linkbox .btn,.panel>.acts .btn{min-height:42px}
 
 main{flex:1;min-height:0;display:flex;position:relative}
 
@@ -112,7 +136,7 @@ main{flex:1;min-height:0;display:flex;position:relative}
 #sheet.busy{pointer-events:none;opacity:.7}
 #sheet::before{content:"";flex:none;width:40px;height:4px;border-radius:2px;background:var(--line);margin:8px auto 0}
 .x{position:absolute;right:10px;top:10px;width:36px;height:36px;border-radius:50%;border:0;background:var(--ivory);font-size:18px;line-height:1;color:var(--muted);z-index:1}
-#body{overflow-y:auto;padding:10px 18px 22px;-webkit-overflow-scrolling:touch}
+#body{flex:1;min-height:0;overflow-y:auto;padding:10px 18px 22px;-webkit-overflow-scrolling:touch}
 .head{display:flex;gap:14px;align-items:center;padding-right:40px}
 .head .av{width:64px;height:64px}.head .av b{width:54px;height:54px;font-size:18px}
 h2{font-family:var(--display);font-weight:700;font-size:19px;letter-spacing:.04em;margin:0;color:var(--gold-deep);text-wrap:balance;overflow-wrap:anywhere}
@@ -151,6 +175,14 @@ h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
 .match dt{color:var(--muted)}.match dd{margin:0;font-weight:600}
 .help{font-size:12.5px;color:var(--muted);margin:10px 0 0}
 .empty{display:none}
+.drow{display:grid;grid-template-columns:80px 1fr 88px;gap:8px}
+.drow .field{padding:0 8px;min-width:0}
+.pick{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.pick.show{position:static;opacity:1;width:100%;height:50px;pointer-events:auto;margin-top:8px;border-radius:12px;border:1.5px solid var(--gold);padding:0 12px;background:#fff}
+.dates{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0;font-size:13.5px}
+.dates dt{color:var(--muted)}
+.dates dd{margin:0;font-weight:600}
+.dates small{display:block;font-weight:400;color:var(--muted);font-size:12.5px}
 
 @media (min-width:900px){
   #sheet{position:static;transform:none;transition:none;width:390px;max-height:none;flex:none;border-top:0;border-left:1px solid var(--line);border-radius:0;box-shadow:none}
@@ -178,6 +210,20 @@ h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
       <input class="field" id="pass" type="password" autocomplete="current-password" required>
       <button class="btn pri wide" id="loginbtn" type="button" style="margin-top:8px">Log in</button>
       <button class="btn txt wide" id="forgot" type="button">Forgot password?</button>
+      <button class="btn wide" id="toreg" type="button">New here? Register</button>
+    </form>
+    <form id="register" novalidate hidden>
+      <p class="help" style="font-size:14px;text-align:center;margin:0 0 6px">Ask to join the family archive. A family admin approves each request before you can enter.</p>
+      <label for="gname">Your full name</label>
+      <input class="field" id="gname" autocomplete="name">
+      <label for="gemail">Email</label>
+      <input class="field" id="gemail" type="email" autocomplete="username">
+      <label for="gpass">Choose a password</label>
+      <input class="field" id="gpass" type="password" autocomplete="new-password">
+      <label for="gabout">How are you related? For example, your father’s name</label>
+      <input class="field" id="gabout" autocomplete="off">
+      <button class="btn pri wide" id="regbtn" type="button" style="margin-top:8px">Request to join</button>
+      <button class="btn txt wide" id="regback" type="button">I already have a login</button>
     </form>
     <form id="reset" novalidate hidden>
       <p class="help" id="resethelp" style="font-size:14px;text-align:center;margin:0 0 6px"></p>
@@ -199,18 +245,23 @@ h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
       <button class="btn txt wide" id="rback" type="button">Back to log in</button>
     </form>
     <div id="notmember" hidden>
-      <p class="help" style="font-size:14px">You are signed in, but this login is not on the family members list yet. Ask a family admin to add you.</p>
-      <div class="acts" style="justify-content:center"><button class="btn" id="out2">Sign out</button></div>
+      <p class="help" id="pendtxt" style="font-size:14.5px;color:var(--ink)"></p>
+      <div class="acts" style="justify-content:center"><button class="btn pri" id="pcheck" type="button">Check again</button><button class="btn" id="out2" type="button">Sign out</button></div>
     </div>
     <p class="msg info" id="gatemsg">Opening the family archive…</p>
-    <p class="ver">Version 0.4</p>
+    <p class="ver">Ref K7M4</p>
   </div>
 </div>
 
 <header class="bar">
   <img src="data:image/jpeg;base64,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" alt="">
   <div class="brand"><b>Shajare Ahmed Online</b><small>Tracing our past, inspiring our future</small></div>
-  <button class="out" id="out">Sign out</button>
+  <button class="cbtn" id="contrib" type="button" aria-pressed="false">Contribute</button>
+  <button class="out" id="menu" type="button" aria-label="Menu">⋯</button>
+  <div class="menu" id="menupop" hidden>
+    <button id="mmembers" type="button" hidden>Admin</button>
+    <button id="out" type="button">Sign out</button>
+  </div>
 </header>
 <main>
   <div id="stage" data-z="near">
@@ -232,6 +283,13 @@ h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
     <button class="x" id="close" aria-label="Close">&times;</button>
     <div id="body"></div>
   </aside>
+  <section id="admin" hidden>
+    <div class="adm">
+      <div class="admhead"><h2>Admin</h2><button class="btn" id="admclose" type="button">Back to the tree</button></div>
+      <p class="msg info" id="admmsg" role="status"></p>
+      <div id="admbody"></div>
+    </div>
+  </section>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -252,15 +310,96 @@ let P={},UN=[],UNK=new Set(),KIDS={},ME=null,ROLE='member',ROOT=null,rootAnchor=
 const SEX={male:'m',female:'f',unknown:'u'},SEXF={m:'male',f:'female',u:'unknown'};
 function ingest(s){
   P={};
-  for(const r of s.persons)P[r.id]={id:r.id,name:r.full_name,given:r.given_name,family:r.family_name||'',known:r.known_as||'',s:SEX[r.sex]||'u',b:r.birth_year,bp:r.birth_precision,d:r.death_year,living:r.is_living,status:r.status,v:r.status==='verified',photo:r.has_photo,par:[]};
+  for(const r of s.persons)P[r.id]={id:r.id,name:r.full_name,given:r.given_name,family:r.family_name||'',known:r.known_as||'',s:SEX[r.sex]||'u',b:r.birth_year,bp:r.birth_precision,d:r.death_year,living:r.is_living,status:r.status,v:r.status==='verified',photo:r.has_photo,bd:r.birth||null,dd:r.death||null,par:[]};
   for(const l of s.links)if(P[l.child_id]&&P[l.parent_id])P[l.child_id].par.push(l.parent_id);
   UN=s.unions.filter(u=>P[u.a]&&P[u.b]).map(u=>[u.a,u.b]);
+  UD={};for(const u of s.unions)UD[ukey(u.a,u.b)]={marriage:u.marriage||null,engagement:u.engagement||null};
   UNK=new Set((s.unknowns||[]).map(k=>k.person_id+':'+k.fact));
   KIDS={};
   for(const p of Object.values(P))for(const x of p.par)(KIDS[x]=KIDS[x]||[]).push(p.id);
   for(const k in KIDS)KIDS[k].sort((a,b)=>(P[a].b||9999)-(P[b].b||9999)||P[a].name.localeCompare(P[b].name));
 }
+let UD={};
+const ukey=(a,b)=>a<b?a+'|'+b:b+'|'+a;
 const kids=id=>KIDS[id]||[];
+
+/* ---------- Dates: Gregorian and Hijri side by side ---------- */
+const GM=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const HM=['Muharram','Safar','Rabi al-Awwal','Rabi al-Thani','Jumada al-Awwal','Jumada al-Thani','Rajab','Shaban','Ramadan','Shawwal','Dhul Qadah','Dhul Hijjah'];
+const hasDate=o=>!!(o&&(o.y||o.m||o.hm||o.hy));
+function fmtG(o){
+  if(!o)return '';const mn=o.m?GM[o.m-1].slice(0,3):'';
+  if(o.y)return o.m?(o.d?o.d+' ':'')+mn+' '+o.y:(o.about?'c. ':'')+o.y;
+  return o.m?(o.d?o.d+' ':'')+mn:'';
+}
+function fmtH(o){
+  if(!o)return '';
+  if(o.hm)return (o.hd?o.hd+' ':'')+HM[o.hm-1]+(o.hy?' '+o.hy+' AH':'');
+  return o.hy?o.hy+' AH':'';
+}
+// Hijri date for a full Gregorian date (Umm al-Qura calendar; can differ by a day from local moon sighting).
+function toHijri(y,m,d){
+  try{
+    const f=new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn',{day:'numeric',month:'numeric',year:'numeric',timeZone:'UTC'});
+    const o={};for(const p of f.formatToParts(new Date(Date.UTC(y,m-1,d,12))))o[p.type]=p.value;
+    const r={y:parseInt(o.year,10),m:parseInt(o.month,10),d:parseInt(o.day,10)};
+    return r.y>0&&r.m>=1&&r.m<=12&&r.d>=1&&r.d<=30?r:null;
+  }catch(_){return null}
+}
+const validG=(y,m,d)=>{const t=new Date(Date.UTC(y,m-1,d));return t.getUTCFullYear()===y&&t.getUTCMonth()===m-1&&t.getUTCDate()===d};
+const AUTO_NOTE='Hijri date worked out from the Gregorian date. It can differ by a day from the moon sighting, so correct it if you know the exact date.';
+const opt=(v,cur,lab)=>'<option value="'+v+'"'+(String(cur)===String(v)?' selected':'')+'>'+lab+'</option>';
+const nums=n=>Array.from({length:n},(_,i)=>i+1);
+function dateEditor(px,title,o){
+  o=o||{};const auto=!!(o.hm&&!o.hc&&o.y&&o.m&&o.d);
+  return '<h3>'+title+'</h3><div class="lab">Gregorian</div><div class="drow" style="margin-top:8px">'+
+    '<select class="field" id="'+px+'_d" aria-label="Day"><option value="">Day</option>'+nums(31).map(i=>opt(i,o.d||'',i)).join('')+'</select>'+
+    '<select class="field" id="'+px+'_m" aria-label="Month"><option value="">Month</option>'+GM.map((n,i)=>opt(i+1,o.m||'',n)).join('')+'</select>'+
+    '<input class="field" id="'+px+'_y" inputmode="numeric" maxlength="4" placeholder="Year" aria-label="Year" value="'+(o.y||'')+'"></div>'+
+    '<div class="chips" style="margin-top:8px"><button class="chip add" type="button" data-cal="'+px+'">Pick from a calendar</button></div>'+
+    '<input class="pick" type="date" id="'+px+'_pick" tabindex="-1" aria-label="Pick a date">'+
+    '<label class="check" style="margin-top:8px"><input type="checkbox" id="'+px+'_about"'+(o.about?' checked':'')+'> The year is an estimate</label>'+
+    '<div class="lab" style="margin-top:12px">Hijri</div><div class="drow" style="margin-top:8px">'+
+    '<select class="field" id="'+px+'_hd" aria-label="Hijri day"><option value="">Day</option>'+nums(30).map(i=>opt(i,o.hd||'',i)).join('')+'</select>'+
+    '<select class="field" id="'+px+'_hm" aria-label="Hijri month"><option value="">Month</option>'+HM.map((n,i)=>opt(i+1,o.hm||'',n)).join('')+'</select>'+
+    '<input class="field" id="'+px+'_hy" inputmode="numeric" maxlength="4" placeholder="Year AH" aria-label="Hijri year" value="'+(o.hy||'')+'"></div>'+
+    '<p class="help" id="'+px+'_note" data-auto="'+(auto?'1':'0')+'" data-g="'+(o.y&&o.m&&o.d?o.y+'-'+o.m+'-'+o.d:'')+'">'+(auto?AUTO_NOTE:'Choose only the parts you know. A full Gregorian date fills in the Hijri date for you; the Hijri day and month can also be set on their own.')+'</p>';
+}
+function recalcHijri(px){
+  const y=parseInt($(px+'_y').value,10),m=parseInt($(px+'_m').value,10),d=parseInt($(px+'_d').value,10);
+  if(!(y>=1000&&m&&d&&validG(y,m,d)))return;
+  const n0=$(px+'_note'),key=y+'-'+m+'-'+d;
+  if(n0.dataset.g===key)return;          // Gregorian date unchanged: keep any Hijri correction the person made
+  n0.dataset.g=key;
+  const h=toHijri(y,m,d);if(!h)return;
+  $(px+'_hd').value=h.d;$(px+'_hm').value=h.m;$(px+'_hy').value=h.y;
+  const n=$(px+'_note');n.dataset.auto='1';n.textContent=AUTO_NOTE;
+}
+function readDate(px,label){
+  const v=k=>{const t=String($(px+'_'+k).value||'').trim();return t===''?null:t};
+  const ys=v('y'),m=v('m')?parseInt(v('m'),10):null,d=v('d')?parseInt(v('d'),10):null,now=new Date().getFullYear();
+  let y=null;
+  if(ys!==null){y=parseInt(ys,10);if(!/^\d{4}$/.test(ys)||y<1000||y>now)throw new Error(label+': the year should be between 1000 and '+now+'.')}
+  if(d&&!m)throw new Error(label+': choose a month to go with the day.');
+  if(y&&m&&d&&!validG(y,m,d))throw new Error(label+': that date does not exist in the calendar.');
+  const hys=v('hy'),hm=v('hm')?parseInt(v('hm'),10):null,hd=v('hd')?parseInt(v('hd'),10):null;
+  let hy=null;
+  if(hys!==null){hy=parseInt(hys,10);if(!/^\d{1,4}$/.test(hys)||hy<1||hy>1700)throw new Error(label+': the Hijri year does not look right.')}
+  if(hd&&!hm)throw new Error(label+': choose a Hijri month to go with the Hijri day.');
+  return {year:y,month:m,day:d,about:!!(y&&!m&&$(px+'_about').checked),hijri_year:hy,hijri_month:hm,hijri_day:hd,
+    hijri_confirmed:!!((hm||hy)&&$(px+'_note').dataset.auto!=='1'),calendar:(y||m)?'gregorian':((hm||hy)?'hijri':'gregorian')};
+}
+function datesHTML(id){
+  const p=P[id],rows=[];
+  if(hasDate(p.bd))rows.push(['Born',p.bd]);
+  if(hasDate(p.dd))rows.push(['Passed away',p.dd]);
+  for(const s of spouses(id)){const u=UD[ukey(id,s)];if(!u)continue;
+    if(hasDate(u.engagement))rows.push(['Engaged to '+P[s].given,u.engagement]);
+    if(hasDate(u.marriage))rows.push(['Married '+P[s].given,u.marriage])}
+  if(!rows.length)return '';
+  return '<h3>Dates</h3><dl class="dates">'+rows.map(r=>{const g=fmtG(r[1]),h=fmtH(r[1]);
+    return '<dt>'+esc(r[0])+'</dt><dd>'+esc(g||h)+(g&&h?'<small>'+esc(h)+(r[1].hc?'':' (worked out)')+'</small>':'')+'</dd>'}).join('')+'</dl>';
+}
 const spouses=id=>UN.filter(u=>u[0]===id||u[1]===id).map(u=>u[0]===id?u[1]:u[0]);
 const father=id=>P[id].par.find(x=>P[x].s==='m');
 const mother=id=>P[id].par.find(x=>P[x].s==='f');
@@ -339,15 +478,21 @@ const nameKey=n=>{const t=n.trim().toLowerCase().split(/\s+/).filter(w=>!/^(syed
 const NW=176,NH=60,GX=18,ROW=124;
 const expanded=new Set();
 let tgt={},tp={},Wd={},cur={},view={x:0,y:0,k:1},anim=null,sel=null,flow=null;
-function measure(id){const ks=expanded.has(id)?tkids(id):[];let w=NW;if(ks.length)w=Math.max(NW,ks.map(measure).reduce((a,b)=>a+b,0)+GX*(ks.length-1));return Wd[id]=w}
+const SG=10;let OXo={};
+const sps=id=>spouses(id).filter(s=>!inTree(s));   // spouses drawn beside their partner
+const unitW=id=>NW+sps(id).length*(NW+SG);
+function measure(id){const ks=expanded.has(id)?tkids(id):[];let w=unitW(id);if(ks.length)w=Math.max(w,ks.map(measure).reduce((a,b)=>a+b,0)+GX*(ks.length-1));return Wd[id]=w}
 function place(id,left,depth,parent){
-  tgt[id]={x:left+Wd[id]/2,y:depth*ROW,d:depth};tp[id]=parent;
+  const sp=sps(id),x=left+(Wd[id]-unitW(id))/2+NW/2,y=depth*ROW;
+  tgt[id]={x,y,d:depth};tp[id]=parent;
+  sp.forEach((s,i)=>{if(!tgt[s])tgt[s]={x:x+(i+1)*(NW+SG),y,d:depth,sp:id}});
+  OXo[id]=sp.length===1?(NW+SG)/2:0;      // children hang from the middle of a couple
   if(!expanded.has(id))return;
   const ks=tkids(id);if(!ks.length)return;
   let cl=left+(Wd[id]-(ks.reduce((a,k)=>a+Wd[k],0)+GX*(ks.length-1)))/2;
   for(const k of ks){place(k,cl,depth+1,id);cl+=Wd[k]+GX}
 }
-function layout(){tgt={};tp={};Wd={};if(ROOT){measure(ROOT);place(ROOT,0,0,null)}}
+function layout(){tgt={};tp={};Wd={};OXo={};if(ROOT){measure(ROOT);place(ROOT,0,0,null)}}
 
 /* ---------- Rendering ---------- */
 const $=id=>document.getElementById(id);
@@ -356,9 +501,10 @@ const els={};
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const desktop=()=>matchMedia('(min-width:900px)').matches;
 function nodeHTML(id){
-  const p=P[id],n=tkids(id).length,sp=spouses(id),c=completeness(id);
-  const sub=esc(years(p))+(sp.length?' · & '+esc(first(sp[0])):'');
-  return '<span class="blabel'+(tgt[id].d<=1?' on':'')+'">'+esc(first(id))+'’s line · '+(descCount(id)+1)+'</span>'+
+  const p=P[id],isSp=!!tgt[id].sp,n=isSp?0:tkids(id).length,c=completeness(id);
+  const tsp=isSp?[]:spouses(id).filter(inTree);
+  const sub=esc(years(p))+(tsp.length?' \u00b7 & '+esc(first(tsp[0])):'');
+  return (isSp?'':'<span class="blabel'+(tgt[id].d<=1?' on':'')+'">'+esc(first(id))+'\u2019s line \u00b7 '+(descCount(id)+1)+'</span>')+
     '<span class="av" style="--p:'+c.pct+'"><b>'+esc(initials(p))+'</b></span>'+
     '<span class="tx"><span class="nm">'+esc(p.name)+'</span><span class="sb">'+sub+'</span></span>'+
     (p.v?'<i class="gem" title="Verified"></i>':'')+(id===ME?'<span class="you">You</span>':'')+
@@ -366,21 +512,23 @@ function nodeHTML(id){
 }
 function syncEls(){
   for(const id in els)if(!tgt[id]){els[id].remove();delete els[id]}
-  const selHost=sel&&P[sel]?host(sel):null;
+  const shown=sel&&P[sel]?(tgt[sel]?sel:host(sel)):null;
   for(const id in tgt){
     let el=els[id];
     if(!el){el=els[id]=document.createElement('div');el.dataset.id=id;el.tabIndex=0;el.setAttribute('role','button');world.appendChild(el)}
-    el.className='node'+(P[id].v?'':' unv')+(id===ME?' me':'')+(id===selHost?' sel':'');
+    el.className='node'+(P[id].v?'':' unv')+(tgt[id].sp?' sp':'')+(id===ME?' me':'')+(id===shown?' sel':'');
     el.innerHTML=nodeHTML(id);
   }
 }
 function draw(){
   let d='';
   for(const id in cur){
-    const c=cur[id],el=els[id];if(!el)continue;
+    const c=cur[id],el=els[id],t=tgt[id];if(!el||!t)continue;
     el.style.transform='translate('+(c.x-NW/2)+'px,'+c.y+'px)';
+    if(t.sp){d+='M'+(c.x-NW/2-SG)+','+(c.y+NH/2)+'h'+SG;continue}   // marriage link
     const pr=tp[id];
-    if(pr&&cur[pr]){const a=cur[pr],y1=a.y+NH,y2=c.y,my=(y1+y2)/2;d+='M'+a.x+','+y1+'C'+a.x+','+my+' '+c.x+','+my+' '+c.x+','+y2}
+    if(pr&&cur[pr]){const a=cur[pr],o=OXo[pr]||0,ax=a.x+o,yb=a.y+NH,y2=c.y,my=(yb+y2)/2;
+      d+='M'+ax+','+(o?a.y+NH/2:yb)+(o?'V'+yb:'')+'C'+ax+','+my+' '+c.x+','+my+' '+c.x+','+y2}
   }
   epath.setAttribute('d',d);
   applyView();
@@ -394,7 +542,7 @@ function run(viewTo,dur){
   if(anim)anim.finish();
   dur=reduce?0:(dur==null?380:dur);
   const from={};
-  for(const id in tgt)from[id]=cur[id]?cur[id]:(tp[id]&&cur[tp[id]]?cur[tp[id]]:tgt[id]);
+  for(const id in tgt){const o=tp[id]||tgt[id].sp;from[id]=cur[id]?cur[id]:(o&&cur[o]?cur[o]:tgt[id])}
   const vf={...view},vt=viewTo||vf,t0=performance.now();
   syncEls();
   const set=e=>{cur={};for(const id in tgt){const a=from[id],b=tgt[id];cur[id]={x:a.x+(b.x-a.x)*e,y:a.y+(b.y-a.y)*e}}view={x:vf.x+(vt.x-vf.x)*e,y:vf.y+(vt.y-vf.y)*e,k:vf.k+(vt.k-vf.k)*e};draw()};
@@ -418,7 +566,19 @@ function focus(id,opts){
   reveal(h);if(opts.expand)expanded.add(h);
   sel=id;if(!opts.keepFlow)flow=null;
   layout();renderSheet();
-  run(viewFor(h,opts.k));
+  run(viewFor(tgt[id]?id:h,opts.k));
+}
+function fitTo(ids,maxK){
+  const pts=ids.filter(i=>tgt[i]).map(i=>tgt[i]);if(!pts.length)return null;
+  const x0=Math.min(...pts.map(p=>p.x))-NW/2,x1=Math.max(...pts.map(p=>p.x))+NW/2,y0=Math.min(...pts.map(p=>p.y)),y1=Math.max(...pts.map(p=>p.y))+NH;
+  const f=frame(),k=Math.max(0.35,Math.min(maxK||1,(f.w-40)/(x1-x0),(f.h-130)/(y1-y0)));
+  return {k,x:f.w/2-(x0+x1)/2*k,y:Math.max(70,(f.h-(y1-y0)*k)/2+12)-y0*k};
+}
+// A member's own immediate family: spouse and children if they have any, otherwise parents and siblings.
+function familyOf(id){
+  const sp=spouses(id),ks=kids(id);
+  if(sp.length||ks.length){const h=host(id);if(h)expanded.add(h);return [id,...sp,...ks]}
+  return [id,...P[id].par,...siblings(id)];
 }
 function fitAll(){
   layout();
@@ -514,17 +674,140 @@ function renderSheet(){
     '<div class="pills">'+(rel?'<span class="pill rel">'+(rel==='You'?'This is you':esc('Your '+rel.charAt(0).toLowerCase()+rel.slice(1)))+'</span>':'')+
       (p.status==='pending'?'<span class="pill wn">With moderators</span>':p.v?'<span class="pill ok">◆ Verified</span>':'<span class="pill wn">Unverified</span>')+'</div>'+
     '<div class="comp"><div class="meter"><i style="width:'+c.pct+'%"></i></div>Record '+c.pct+'% complete'+(c.next?'. Still needed: '+c.next+'.':'.')+'</div>'+
+    datesHTML(sel)+
     '<h3>Parents</h3>'+(p.par.length?'<div class="chips">'+p.par.map(chip).join('')+'</div>':'<div class="none">Not recorded yet</div>')+
     '<h3>'+(sp.length>1?'Spouses':'Spouse')+'</h3>'+(sp.length?'<div class="chips">'+sp.map(chip).join('')+'</div>':'<div class="none">Not recorded yet</div>')+
     (sib.length?'<h3>Brothers and sisters</h3><div class="chips">'+sib.map(chip).join('')+'</div>':'')+
     '<h3>Children</h3>'+(ks.length?'<div class="chips">'+ks.map(chip).join('')+'</div>':'<div class="none">None recorded yet</div>')+
-    '<h3>Add to '+who(sel)+' family</h3><div class="chips">'+add.map(a=>'<button class="chip add" data-add="'+a[0]+'">+ '+a[1]+'</button>').join('')+'</div>'+
-    '<div class="acts"><button class="btn" data-act="edit">Edit details</button>'+
-      (mod&&!p.v?'<button class="btn" data-act="verify">Mark as verified</button>':'')+
-      (inTree(sel)&&tkids(sel).length?'<button class="btn" data-act="line">Open whole line</button>':'')+'</div>';
+    (linkUser?'<div class="match" style="margin-top:14px"><b>Connect '+esc(linkUser.label)+' to '+esc(p.name)+'?</b><p class="help" style="margin:4px 0 0">This tells the archive that this login belongs to this person.</p><div class="acts" style="margin-top:8px"><button class="btn pri" data-act="link-yes">Connect</button><button class="btn txt" data-act="link-no">Cancel</button></div></div>':'')+
+    (myClaim&&myClaim.person_id===sel?'<div class="match" style="margin-top:14px"><b>You have asked to be connected to this record.</b><p class="help" style="margin:4px 0 0">A moderator will confirm it shortly.</p><div class="acts" style="margin-top:8px"><button class="btn txt" data-act="claim-cancel">Withdraw my request</button></div></div>':'')+
+    (contrib?'<h3>Add to '+who(sel)+' family</h3><div class="chips">'+add.map(a=>'<button class="chip add" data-add="'+a[0]+'">+ '+a[1]+'</button>').join('')+'</div>':'')+
+    (contrib&&sp.length?'<div class="chips" style="margin-top:6px">'+sp.map(x=>'<button class="chip add" data-udates="'+x+'">Engagement and marriage dates'+(sp.length>1?': '+esc(P[x].given):'')+'</button>').join('')+'</div>':'')+
+    '<div class="acts">'+(contrib?'<button class="btn" data-act="edit">Edit details</button><button class="btn" data-act="dates">Edit dates</button>'+
+      (!ME&&!myClaim?'<button class="btn" data-act="claim">This is me</button>':'')+
+      (mod&&!p.v?'<button class="btn" data-act="verify">Mark as verified</button>':''):'')+
+      (inTree(sel)&&tkids(sel).length?'<button class="btn" data-act="line">Open whole line</button>':'')+'</div>'+
+    (contrib?'':'<p class="help">To add relatives or correct details, choose Contribute at the top.</p>');
   body.scrollTop=0;
   sheet.classList.add('on');
 }
+
+/* ---------- View only by default; Contribute switches editing on ---------- */
+let contrib=false,linkUser=null,myClaim=null;
+const skipClaim=()=>{try{return localStorage.getItem('sao-claim-later')==='1'}catch(_){return false}};
+function setContrib(on,quiet){
+  contrib=on;const b=$('contrib');b.classList.toggle('on',on);b.textContent=on?'Contributing':'Contribute';b.setAttribute('aria-pressed',on?'true':'false');
+  if(!on&&flow&&flow.step!=='first'&&flow.step!=='members')flow=null;
+  if(quiet)return;
+  // the first time a member contributes, offer to connect their login to their own record
+  if(on&&!ME&&!myClaim&&ROLE!=='admin'&&!skipClaim()&&Object.keys(P).length&&!flow)flow={step:'claimintro'};
+  renderSheet();
+  if(on&&!sel&&Object.keys(P).length)toast('Select a person to add their relatives or correct their details');
+}
+$('contrib').addEventListener('click',()=>setContrib(!contrib));
+$('menu').addEventListener('click',e=>{e.stopPropagation();$('menupop').hidden=!$('menupop').hidden});
+document.addEventListener('click',()=>{$('menupop').hidden=true});
+
+/* ---------- Admin page (moderators and admin) ---------- */
+let adm=null;
+function amsg(t,err){const m=$('admmsg');m.textContent=t||'';m.className='msg'+(err?'':' info');if(t)$('admin').scrollTop=0}
+async function act(fn){try{return await fn()}catch(e){amsg(String(e.message||e).replace(/^ERROR:\s*/,''),true);return undefined}}
+async function openAdmin(keep){
+  let d;
+  try{d=await Promise.all([rpc('list_access_requests'),rpc('list_members'),rpc('list_invitations'),rpc('list_claims').catch(()=>[])])}catch(e){toast(String(e.message||e),true);return}
+  adm={reqs:d[0]||[],mems:d[1]||[],invs:d[2]||[],claims:d[3]||[],fresh:keep&&adm?adm.fresh:null};
+  if(!keep)amsg('');
+  renderAdmin();$('admin').hidden=false;
+}
+function closeAdmin(){$('admin').hidden=true;adm=null}
+$('mmembers').addEventListener('click',()=>openAdmin());
+$('admclose').addEventListener('click',closeAdmin);
+const inviteUrl=t=>location.origin+location.pathname+'?invite='+t;
+function shareHTML(url){
+  const text='You are invited to join Shajare Ahmed Online, our family archive. Open this link to create your login: '+url;
+  return '<div class="linkbox"><input class="field" readonly value="'+esc(url)+'" aria-label="Invitation link">'+
+    '<button class="btn" type="button" data-copy="'+esc(url)+'">Copy link</button>'+
+    '<a class="btn" href="https://wa.me/?text='+encodeURIComponent(text)+'" target="_blank" rel="noopener">Share on WhatsApp</a>'+
+    '<a class="btn" href="mailto:?subject='+encodeURIComponent('Invitation to Shajare Ahmed Online')+'&body='+encodeURIComponent(text)+'">Send by email</a></div>';
+}
+const day=d=>{try{return new Date(d).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})}catch(_){return ''}};
+function renderAdmin(){
+  const a=adm,isAdm=ROLE==='admin';
+  $('admbody').innerHTML=
+    '<div class="panel"><h3>Waiting for approval ('+a.reqs.length+')</h3>'+
+    (a.reqs.length?a.reqs.map(r=>'<div class="row"><b>'+esc(r.full_name)+'</b><small>'+esc(r.email||'')+' \u00b7 asked on '+day(r.created_at)+'</small>'+(r.about?'<small>\u201c'+esc(r.about)+'\u201d</small>':'')+
+      '<div class="acts"><button class="btn pri" data-req="'+r.user_id+'" data-ok="1">Approve</button><button class="btn" data-req="'+r.user_id+'" data-ok="0">Decline</button></div></div>').join(''):'<div class="none">No one is waiting.</div>')+'</div>'+
+
+    '<div class="panel"><h3>\u201cThis is me\u201d requests ('+a.claims.length+')</h3>'+
+    (a.claims.length?'<p class="help">Each member below says a record in the tree is their own. Confirm only if you are sure it is the right person.</p>'+a.claims.map(c=>'<div class="row"><b>'+esc(c.member_name)+' says they are '+esc(c.person_name)+'</b><small>'+esc(c.email||'')+(c.about?' \u00b7 \u201c'+esc(c.about)+'\u201d':'')+'</small>'+
+      '<small>Record: '+(c.parents&&c.parents.length?'child of '+esc(c.parents.join(' and ')):'parents not recorded')+(c.birth_year?' \u00b7 born '+c.birth_year:'')+'</small>'+
+      '<div class="acts"><button class="btn pri" data-claim="'+c.user_id+'" data-ok="1">Confirm</button><button class="btn" data-claim="'+c.user_id+'" data-ok="0">Decline</button><button class="btn txt" data-go="'+c.person_id+'">Show in tree</button></div></div>').join(''):'<div class="none">No requests.</div>')+'</div>'+
+
+    '<div class="panel"><h3>Invite someone</h3><p class="help">Creates a private link for one person. Whoever opens it makes their own login and comes straight in, with no approval step. Each link works once and lasts 30 days.</p>'+
+    '<div class="stack"><div class="lab">Name of the person you are inviting</div><input class="field" id="ilabel" autocomplete="off"></div>'+
+    '<div class="acts" style="margin-top:10px"><button class="btn pri" data-act="mkinv">Create invitation link</button></div>'+
+    (a.fresh?'<p class="help" style="margin:12px 0 0;color:var(--ink)">Invitation for <b>'+esc(a.fresh.label)+'</b> is ready. Send it to them:</p>'+shareHTML(inviteUrl(a.fresh.token)):'')+
+    (a.invs.length?'<h3 style="margin-top:16px">Open invitations ('+a.invs.length+')</h3>'+a.invs.map(i=>'<div class="row"><b>'+esc(i.label)+'</b><small>Created '+day(i.created_at)+' \u00b7 valid until '+day(i.expires_at)+'</small>'+
+      '<div class="acts"><button class="btn" data-copy="'+esc(inviteUrl(i.token))+'">Copy link</button><button class="btn txt" data-revoke="'+i.id+'">Cancel invitation</button></div></div>').join(''):'')+'</div>'+
+
+    '<div class="panel"><h3>Add a member directly</h3><p class="help">Creates a login with the email and password you choose, already approved. Give the details to the person privately.</p>'+
+    '<div class="stack"><div class="lab">Full name</div><input class="field" id="dname" autocomplete="off">'+
+    '<div class="lab">Email</div><input class="field" id="demail" type="email" autocomplete="off">'+
+    '<div class="lab">Password (at least 8 characters)</div><input class="field" id="dpass" type="text" autocomplete="off"></div>'+
+    '<div class="acts" style="margin-top:10px"><button class="btn pri" data-act="mkuser">Create login</button></div></div>'+
+
+    '<div class="panel"><h3>Members ('+a.mems.length+')</h3>'+
+    a.mems.map(m=>{
+      const role=m.role==='admin'?'Admin':m.role==='moderator'?'Moderator':'Member';let b='';
+      if(m.person_id)b+='<button class="btn" data-go="'+m.person_id+'">Show in tree</button><button class="btn txt" data-unlink="'+m.user_id+'">Disconnect</button>';
+      else if(!m.is_me)b+='<button class="btn" data-link="'+m.user_id+'" data-label="'+esc(m.full_name)+'">Connect to a person</button>';
+      if(isAdm&&!m.is_me){
+        if(m.role==='member')b+='<button class="btn" data-role="moderator" data-user="'+m.user_id+'">Make moderator</button>';
+        if(m.role==='moderator')b+='<button class="btn" data-role="member" data-user="'+m.user_id+'">Return to member</button>';
+        b+='<button class="btn txt" data-active="'+(m.active?'0':'1')+'" data-user="'+m.user_id+'">'+(m.active?'Switch off access':'Switch access on')+'</button>';
+      }
+      return '<div class="row"><b>'+esc(m.full_name)+(m.is_me?' (you)':'')+'</b><small>'+esc(m.email||'')+'</small><small>'+role+(m.active?'':' \u00b7 access switched off')+' \u00b7 '+(m.person_name?'connected to '+esc(m.person_name):'not connected to a person in the tree')+'</small>'+(b?'<div class="acts">'+b+'</div>':'')+'</div>';
+    }).join('')+'</div>';
+}
+$('admbody').addEventListener('click',async e=>{
+  const t=e.target;let x;
+  if(x=t.closest('[data-req]')){const ok=x.dataset.ok==='1';if(await act(()=>rpc('decide_access',{p_user:x.dataset.req,p_approve:ok}).then(()=>true))){await openAdmin(true);amsg(ok?'Approved. They can sign in now.':'Request declined.')}return}
+  if(x=t.closest('[data-claim]')){const ok=x.dataset.ok==='1';if(await act(()=>rpc('decide_claim',{p_user:x.dataset.claim,p_approve:ok}).then(()=>true))){await openAdmin(true);amsg(ok?'Confirmed. Their login is now connected to that record.':'Request declined.')}return}
+  if(x=t.closest('[data-role]')){const r=x.dataset.role;if(await act(()=>rpc('set_member_role',{p_user:x.dataset.user,p_role:r}).then(()=>true))){await openAdmin(true);amsg(r==='moderator'?'They are now a moderator.':'They are now a member.')}return}
+  if(x=t.closest('[data-active]')){const on=x.dataset.active==='1';if(await act(()=>rpc('set_member_active',{p_user:x.dataset.user,p_active:on}).then(()=>true))){await openAdmin(true);amsg(on?'Access switched on.':'Access switched off.')}return}
+  if(x=t.closest('[data-unlink]')){if(await act(()=>rpc('link_member',{p_user:x.dataset.unlink,p_person:null}).then(()=>true))){await openAdmin(true);amsg('Disconnected.')}return}
+  if(x=t.closest('[data-link]')){linkUser={id:x.dataset.link,label:x.dataset.label};closeAdmin();flow=null;renderSheet();toast('Now select the person in the tree who is '+linkUser.label);return}
+  if(x=t.closest('[data-go]')){const id=x.dataset.go;closeAdmin();focus(id,{expand:true});return}
+  if(x=t.closest('[data-revoke]')){if(await act(()=>rpc('revoke_invitation',{p_id:x.dataset.revoke}).then(()=>true))){adm.fresh=null;await openAdmin(true);amsg('Invitation cancelled.')}return}
+  if(x=t.closest('[data-copy]')){
+    const url=x.dataset.copy;let ok=false;
+    try{await navigator.clipboard.writeText(url);ok=true}catch(_){const i=x.parentElement.querySelector('input');if(i){i.focus();i.select()}}
+    amsg(ok?'Link copied. Paste it into a message to the person.':'Select the link and copy it: '+url);return}
+  if(!(x=t.closest('[data-act]')))return;
+  if(x.dataset.act==='mkinv'){
+    const label=$('ilabel').value.trim();
+    const inv=await act(()=>rpc('create_invitation',{p_label:label,p_person:null}));
+    if(inv){adm.fresh=inv;await openAdmin(true);amsg('Invitation link created for '+inv.label+'.')}
+  }
+  if(x.dataset.act==='mkuser'){
+    const nm=$('dname').value.trim(),em=$('demail').value.trim(),pw=$('dpass').value;
+    if(nm.length<2){amsg('Enter the person\u2019s full name.',true);return}
+    if(!/^\S+@\S+\.\S+$/.test(em)){amsg('Enter their email address.',true);return}
+    if(pw.length<8){amsg('Choose a password of at least 8 characters.',true);return}
+    x.disabled=true;amsg('Creating the login\u2026');let confirm=false;
+    if(TEST){await window.__mkuser(em)}
+    else{
+      // a separate, non-saved connection, so the moderator stays signed in as themselves
+      const tmp=window.supabase.createClient(CFG.url,CFG.key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false,storageKey:'sao-new-member'}});
+      let r;try{r=await tmp.auth.signUp({email:em,password:pw,options:{data:{full_name:nm}}})}catch(err){r={error:err}}
+      if(r.error&&!/already registered|already been registered/i.test(r.error.message||'')){x.disabled=false;amsg(authMsg(r.error),true);return}
+      confirm=!r.error&&!(r.data&&r.data.session);
+    }
+    const ok=await act(()=>rpc('add_member_by_email',{p_email:em,p_name:nm}).then(()=>true));
+    x.disabled=false;
+    if(ok){await openAdmin(true);amsg('Login created for '+nm+' and approved. Give them the email and password privately.'+(confirm?' They will be asked to confirm their email before the first login.':''))}
+  }
+});
 
 /* ---------- Guided entry ---------- */
 const QUESTION={
@@ -547,7 +830,21 @@ function startFlow(rel,of){
 function seg(name,opts,val){return '<div class="seg">'+opts.map(o=>'<button type="button" data-'+name+'="'+o[0]+'" class="'+(val===o[0]?'on':'')+'">'+o[1]+'</button>').join('')+'</div>'}
 function renderFlow(){
   const f=flow;let h='';
-  if(f.step==='first'){
+  if(f.step==='claimintro'){
+    h='<div class="step">Before you start</div><p class="q">Are you in the family tree?</p>'+
+      '<p class="help" style="font-size:13.5px;color:var(--ink)">If you find your own record and choose <b>This is me</b>, the archive will open on your own family and show how each person is related to you. A moderator confirms it first.</p>'+
+      '<p class="help">A relative may already have added you, so search for your name first. If you are not there yet, select a relative such as your father and add yourself as their child.</p>'+
+      '<div class="acts"><button class="btn pri" data-act="claim-find">Find my record</button><button class="btn txt" data-act="claim-later">Not now</button></div>';
+  }else if(f.step==='claim'){
+    const p=P[f.of],sp=spouses(f.of);
+    h='<div class="step">This is me</div><p class="q">Is this your own record?</p>'+
+      '<div class="match"><b>'+esc(p.name)+'</b><dl>'+
+      '<dt>Child of</dt><dd>'+(p.par.length?esc(p.par.map(x=>P[x].name).join(' and ')):'Not recorded')+'</dd>'+
+      '<dt>Born</dt><dd>'+esc(fmtG(p.bd)||(p.b?String(p.b):'Not recorded'))+'</dd>'+
+      '<dt>Married to</dt><dd>'+(sp.length?esc(sp.map(x=>P[x].name).join(', ')):'Not recorded')+'</dd></dl></div>'+
+      '<p class="help">A moderator confirms this before it takes effect, so that nobody is connected to the wrong person.</p>'+
+      '<div class="acts"><button class="btn pri" data-act="claim-yes">Yes, this is me</button><button class="btn txt" data-act="cancel">Cancel</button></div>';
+  }else if(f.step==='first'){
     h='<div class="step">Start the archive</div><p class="q">Who is the earliest ancestor you know of?</p><div class="stack">'+
       '<div class="lab">Given name</div><input class="field" id="fgiven" autocomplete="off" value="'+esc(f.given)+'">'+
       '<div class="lab">Family name or father’s name (optional)</div><input class="field" id="ffamily" autocomplete="off" value="'+esc(f.family)+'">'+
@@ -603,24 +900,32 @@ function renderFlow(){
     const p=P[f.of];
     h='<div class="step">Edit details</div><p class="q">'+esc(p.name)+'</p><div class="stack">'+
       '<div class="lab">Given name</div><input class="field" id="egiven" autocomplete="off" value="'+esc(p.given)+'">'+
-      '<div class="lab">Family name or father’s name</div><input class="field" id="efamily" autocomplete="off" value="'+esc(p.family)+'">'+
+      '<div class="lab">Family name or father\u2019s name</div><input class="field" id="efamily" autocomplete="off" value="'+esc(p.family)+'">'+
       '<div class="lab">Known as</div><input class="field" id="eknown" autocomplete="off" value="'+esc(p.known)+'">'+
       '<div class="lab">Gender</div>'+seg('esex',[['m','Male'],['f','Female'],['u','Not recorded']],f.esex)+
-      '<div class="lab">Birth year</div><input class="field" id="eborn" inputmode="numeric" autocomplete="off" value="'+(p.b||'')+'">'+
-      '<label class="check"><input type="checkbox" id="eest"'+((p.bp==='about'||p.bp==='decade')?' checked':'')+'> Birth year is an estimate</label>'+
       '<div class="lab">Living</div>'+seg('eliv',[['y','Living'],['n','Passed away'],['u','Not known']],f.eliv)+
-      (f.eliv==='n'?'<div class="lab">Year of passing</div><input class="field" id="edied" inputmode="numeric" autocomplete="off" value="'+(p.d||'')+'">':'')+
-      '</div><div class="acts"><button class="btn pri" data-act="edit-save">Save changes</button><button class="btn txt" data-act="cancel">Cancel</button></div>';
+      '</div><p class="help">Dates of birth and passing are under Edit dates.</p>'+
+      '<div class="acts"><button class="btn pri" data-act="edit-save">Save changes</button><button class="btn txt" data-act="cancel">Cancel</button></div>';
+  }else if(f.step==='dates'){
+    const p=P[f.of];
+    h='<div class="step">Edit dates</div><p class="q">'+esc(p.name)+'</p>'+
+      dateEditor('db','Date of birth',p.bd)+(p.living===true?'':dateEditor('dd','Date of passing',p.dd))+
+      '<div class="acts"><button class="btn pri" data-act="dates-save">Save dates</button><button class="btn txt" data-act="cancel">Cancel</button></div>';
+  }else if(f.step==='udates'){
+    const u=UD[ukey(f.of,f.sp)]||{};
+    h='<div class="step">Engagement and marriage</div><p class="q">'+esc(P[f.of].name)+' and '+esc(P[f.sp].name)+'</p>'+
+      dateEditor('de','Engagement',u.engagement)+dateEditor('dm','Marriage',u.marriage)+
+      '<div class="acts"><button class="btn pri" data-act="udates-save">Save dates</button><button class="btn txt" data-act="cancel">Cancel</button></div>';
   }
   body.innerHTML=h;body.scrollTop=0;
-  const inp=body.querySelector('.field');if(inp&&desktop()&&f.step!=='edit')inp.focus();
+  const inp=body.querySelector('.field');if(inp&&desktop()&&!/edit|dates/.test(f.step))inp.focus();
 }
 function keepInputs(){
   const f=flow;if(!f)return;
   if(f.step==='name'||f.step==='first'){f.given=$('fgiven').value;f.family=$('ffamily').value}
-  if(f.step==='edit'){f.keep={given:$('egiven').value,family:$('efamily').value,known:$('eknown').value,born:$('eborn').value,est:$('eest').checked,died:$('edied')?$('edied').value:null}}
+  if(f.step==='edit'){f.keep={given:$('egiven').value,family:$('efamily').value,known:$('eknown').value}}
 }
-function restoreEdit(){const k=flow.keep;if(!k)return;$('egiven').value=k.given;$('efamily').value=k.family;$('eknown').value=k.known;$('eborn').value=k.born;$('eest').checked=k.est;if($('edied')&&k.died!=null)$('edied').value=k.died}
+function restoreEdit(){const k=flow.keep;if(!k)return;$('egiven').value=k.given;$('efamily').value=k.family;$('eknown').value=k.known}
 function parseYear(v,label){
   const t=String(v||'').trim();if(!t)return null;
   const y=parseInt(t,10),now=new Date().getFullYear();
@@ -636,7 +941,7 @@ async function createPerson(pending){
   const h=host(id);
   if(!h){rootAnchor=id;buildTree()}
   const hh=host(id);reveal(hh);if(TP[hh])expanded.add(TP[hh]);expanded.add(hh);if(f.rel==='child')expanded.add(host(f.of));
-  layout();renderSheet();run(viewFor(hh));
+  layout();renderSheet();run(viewFor(tgt[id]?id:hh));
 }
 function afterBorn(){
   const f=flow,p=P[f.newId],now=new Date().getFullYear();
@@ -647,6 +952,14 @@ body.addEventListener('click',async e=>{
   const go=e.target.closest('[data-go]');if(go){focus(go.dataset.go,{expand:true});return}
   const ad=e.target.closest('[data-add]');if(ad){startFlow(ad.dataset.add,sel);return}
   const nx=e.target.closest('[data-next]');if(nx){startFlow(nx.dataset.next,nx.dataset.of);return}
+  const ud=e.target.closest('[data-udates]');if(ud){flow={step:'udates',of:sel,sp:ud.dataset.udates};renderSheet();return}
+  const cl=e.target.closest('[data-cal]');
+  if(cl){
+    const px=cl.dataset.cal,pk=$(px+'_pick'),y=parseInt($(px+'_y').value,10),m=parseInt($(px+'_m').value,10),d=parseInt($(px+'_d').value,10);
+    if(y>=1000&&m&&d&&validG(y,m,d))pk.value=y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    try{pk.showPicker()}catch(_){pk.classList.add('show');pk.focus()}
+    return;
+  }
   const f=flow;
   const sx=e.target.closest('[data-sex]');if(sx){keepInputs();f.sex=sx.dataset.sex;renderFlow();return}
   const op=e.target.closest('[data-op]');if(op){keepInputs();f.otherParent=op.dataset.op;renderFlow();return}
@@ -658,6 +971,19 @@ body.addEventListener('click',async e=>{
   else if(a==='verify'){const id=sel;if(await busy(()=>rpc('update_person',{p_id:id,p_changes:{status:'verified'}}).then(()=>true))){await busy(refresh);layout();run();renderSheet();toast(first(id)+' is now verified')}}
   else if(a==='line'){(function open(id){expanded.add(id);tkids(id).forEach(open)})(sel);layout();run(viewFor(sel,Math.min(view.k,0.6)));toast('Opened every generation below '+first(sel))}
   else if(a==='cancel'){flow=null;renderSheet()}
+  else if(a==='link-yes'){const lu=linkUser,pid=sel;if(await busy(()=>rpc('link_member',{p_user:lu.id,p_person:pid}).then(()=>true))){linkUser=null;renderSheet();toast(lu.label+' is now connected to '+P[pid].name)}}
+  else if(a==='link-no'){linkUser=null;renderSheet()}
+  else if(a==='claim'){flow={step:'claim',of:sel};renderSheet()}
+  else if(a==='claim-find'){flow=null;renderSheet();$('q').focus();toast('Search for your name, select your record, then choose This is me')}
+  else if(a==='claim-later'){try{localStorage.setItem('sao-claim-later','1')}catch(_){}flow=null;renderSheet()}
+  else if(a==='claim-yes'){
+    const pid=f.of,r=await busy(()=>rpc('claim_person',{p_person:pid}));
+    if(!r)return;
+    flow=null;
+    if(r.status==='approved'){await enter();toast('Your login is now connected to '+P[pid].name);return}
+    myClaim={status:'pending',person_id:pid};renderSheet();toast('Sent to the moderators to confirm');
+  }
+  else if(a==='claim-cancel'){if(await busy(()=>rpc('cancel_claim',{}).then(()=>true))){myClaim=null;renderSheet();toast('Request withdrawn')}}
   else if(a==='first-save'){
     keepInputs();
     if(f.given.trim().length<2){$('fgiven').focus();toast('Enter a given name to continue',true);return}
@@ -708,27 +1034,60 @@ body.addEventListener('click',async e=>{
     await busy(refresh);f.step='done';layout();run();renderFlow();
   }
   else if(a==='edit-save'){
-    const p=P[f.of],ch={};let born,died=null;
-    try{born=parseYear($('eborn').value,'The birth year');if($('edied'))died=parseYear($('edied').value,'The year of passing')}catch(err){toast(err.message,true);return}
-    const gv=$('egiven').value.trim(),fm=$('efamily').value.trim(),kn=$('eknown').value.trim(),est=$('eest').checked;
+    const p=P[f.of],ch={},id=f.of;
+    const gv=$('egiven').value.trim(),fm=$('efamily').value.trim(),kn=$('eknown').value.trim();
     if(gv.length<2){toast('A given name is needed',true);return}
     if(gv!==p.given)ch.given_name=gv;
     if(fm!==p.family)ch.family_name=fm;
     if(kn!==p.known)ch.known_as=kn;
     if(f.esex!==p.s)ch.sex=SEXF[f.esex];
-    const wasEst=p.bp==='about'||p.bp==='decade';
-    if(born!==(p.b||null)){ch.birth_year=born;if(born)ch.birth_precision=est?'about':'year'}
-    else if(born&&est!==wasEst)ch.birth_precision=est?'about':'year';
-    const liv=f.eliv==='y'?true:f.eliv==='n'?false:null;
-    if(f.eliv==='n'){if(died!==(p.d||null))ch.death_year=died;if(p.living!==false)ch.is_living=false}
-    else{if(p.d)ch.death_year=null;if(liv!==(p.living===undefined?null:p.living))ch.is_living=liv}
-    if(!Object.keys(ch).length){flow=null;renderSheet();return}
-    const id=f.of;
-    if(!await busy(()=>rpc('update_person',{p_id:id,p_changes:ch}).then(()=>true)))return;
+    const liv=f.eliv==='y'?true:f.eliv==='n'?false:null,was=p.living===undefined?null:p.living;
+    if(liv!==was)ch.is_living=liv;
+    const clearDeath=liv===true&&hasDate(p.dd);
+    if(!Object.keys(ch).length&&!clearDeath){flow=null;renderSheet();return}
+    const ok=await busy(async()=>{
+      if(clearDeath)await rpc('set_person_date',{p_id:id,p_which:'death',p_date:{}});
+      if(Object.keys(ch).length)await rpc('update_person',{p_id:id,p_changes:ch});
+      return true});
+    if(!ok)return;
     await busy(refresh);flow=null;layout();run();renderSheet();toast('Saved');
+  }
+  else if(a==='dates'){flow={step:'dates',of:sel};renderSheet()}
+  else if(a==='dates-save'){
+    let b1,d1=null;
+    try{b1=readDate('db','Date of birth');if($('dd_y'))d1=readDate('dd','Date of passing')}catch(err){toast(err.message,true);return}
+    const id=f.of;
+    const ok=await busy(async()=>{
+      await rpc('set_person_date',{p_id:id,p_which:'birth',p_date:b1});
+      if(d1)await rpc('set_person_date',{p_id:id,p_which:'death',p_date:d1});
+      return true});
+    if(!ok)return;
+    await busy(refresh);flow=null;layout();run();renderSheet();toast('Dates saved');
+  }
+  else if(a==='udates-save'){
+    let e1,m1;
+    try{e1=readDate('de','Engagement');m1=readDate('dm','Marriage')}catch(err){toast(err.message,true);return}
+    const x=f.of,y=f.sp;
+    const ok=await busy(async()=>{
+      await rpc('set_union_date',{p_a:x,p_b:y,p_which:'engagement',p_date:e1});
+      await rpc('set_union_date',{p_a:x,p_b:y,p_which:'marriage',p_date:m1});
+      return true});
+    if(!ok)return;
+    await busy(refresh);flow=null;layout();run();renderSheet();toast('Dates saved');
   }
   else if(a==='done'){const id=f.newId;flow=null;focus(id,{})}
 });
+function dateFieldChanged(e){
+  const m=/^(d[bdem])_(d|m|y|hd|hm|hy|pick)$/.exec(e.target.id||'');if(!m)return;
+  const px=m[1],k=m[2];
+  if(k==='pick'){
+    const p=/^(\d{4})-(\d{2})-(\d{2})$/.exec(e.target.value||'');if(!p)return;
+    $(px+'_y').value=parseInt(p[1],10);$(px+'_m').value=parseInt(p[2],10);$(px+'_d').value=parseInt(p[3],10);recalcHijri(px);
+  }else if(k==='d'||k==='m'||k==='y')recalcHijri(px);
+  else{const n=$(px+'_note');n.dataset.auto='0';n.textContent='Hijri date as entered by you.'}
+}
+body.addEventListener('input',dateFieldChanged);
+body.addEventListener('change',dateFieldChanged);
 body.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.classList.contains('field')){e.preventDefault();const b=body.querySelector('.btn.pri');if(b)b.click()}});
 $('close').addEventListener('click',()=>{flow=null;sel=null;renderSheet();syncEls()});
 
@@ -748,37 +1107,56 @@ const mid=()=>{const f=frame();return [f.w/2,f.h/2]};
 function zoomBtn(fac){const [x,y]=mid();const v={...view};zoomAt(x,y,fac);const to={...view};view=v;run(to,200)}
 $('zin').addEventListener('click',()=>zoomBtn(1.35));
 $('zout').addEventListener('click',()=>zoomBtn(1/1.35));
-$('findme').addEventListener('click',()=>{if(rootAnchor){rootAnchor=null;buildTree();cur={}}const h=ME||ROOT;if(h)focus(h,{k:1})});
+$('findme').addEventListener('click',()=>{if(rootAnchor){rootAnchor=null;buildTree();cur={}}
+  if(ME){const fam=familyOf(ME);reveal(ME);sel=ME;flow=null;layout();renderSheet();run(fitTo(fam)||viewFor(ME,1))}
+  else if(ROOT)focus(ROOT,{k:1})});
 $('fit').addEventListener('click',fitAll);
 
 /* ---------- Sign-in and start ---------- */
+let inviteTok=null,inviteErr='';
+try{
+  const u=new URLSearchParams(location.search).get('invite');
+  if(u){try{localStorage.setItem('sao-invite',u)}catch(_){}inviteTok=u;try{history.replaceState(null,'',location.pathname)}catch(_){}}
+  else{try{inviteTok=localStorage.getItem('sao-invite')}catch(_){}}
+}catch(_){}
+function dropInvite(){inviteTok=null;try{localStorage.removeItem('sao-invite')}catch(_){}}
 const gate=$('gate'),gatemsg=$('gatemsg');
 function showGate(mode,msg,isErr){
-  gate.hidden=false;$('login').hidden=mode!=='login';$('notmember').hidden=mode!=='notmember';$('reset').hidden=mode!=='reset';
+  gate.hidden=false;$('login').hidden=mode!=='login';$('notmember').hidden=mode!=='notmember';$('reset').hidden=mode!=='reset';$('register').hidden=mode!=='register';
   gatemsg.textContent=msg||'';gatemsg.className='msg'+(isErr?'':' info');
 }
 async function enter(){
   showGate('wait','Opening the family archive…');
   let me;
   try{me=await rpc('me')}catch(e){showGate('login',String(e.message||e),true);return}
-  if(!me){showGate('notmember');return}
+  if(!me&&inviteTok){
+    const t=inviteTok;dropInvite();
+    try{await rpc('accept_invitation',{p_token:t});return enter()}catch(e){inviteErr=String(e.message||e).replace(/^ERROR:\s*/,'')}
+  }
+  if(!me){await showAccess();return}
+  dropInvite();
   ME=me.person_id||null;ROLE=me.role;
   try{await refresh()}catch(e){showGate('login',String(e.message||e),true);return}
+  myClaim=null;
+  if(!ME){try{const c=await rpc('my_claim');if(c&&c.status==='pending'&&P[c.person_id])myClaim=c}catch(_){}}
   expanded.clear();
   const home=ME||ROOT;
   if(home){let c=home;expanded.add(c);while(TP[c]){c=TP[c];expanded.add(c)}}
+  const fam=ME?familyOf(ME):null;
+  $('mmembers').hidden=!(ROLE==='admin'||ROLE==='moderator');linkUser=null;setContrib(false,true);
   layout();sel=desktop()?home:null;renderSheet();
   cur={};for(const id in tgt)cur[id]={x:tgt[id].x,y:tgt[id].y};
   gate.hidden=true;
-  syncEls();if(home)view=viewFor(home,desktop()?0.95:0.85);draw();
-  if(ME&&Object.keys(P).length===1){sel=ME;renderSheet();run(viewFor(ME));toast('Welcome. Start by adding your father and mother.')}
+  syncEls();if(home)view=(fam&&fitTo(fam))||viewFor(home,desktop()?0.95:0.85);draw();
+  if(ME&&Object.keys(P).length===1){sel=ME;renderSheet();run(viewFor(ME));toast('Welcome. Choose Contribute to start adding your family.')}
 }
-async function signOut(){if(sb)await sb.auth.signOut();for(const id in els){els[id].remove();delete els[id]}P={};tgt={};cur={};epath.setAttribute('d','');sel=null;flow=null;sheet.classList.remove('on');showGate('login','')}
+async function signOut(){if(sb)await sb.auth.signOut();for(const id in els){els[id].remove();delete els[id]}P={};tgt={};cur={};epath.setAttribute('d','');sel=null;flow=null;linkUser=null;myClaim=null;sheet.classList.remove('on');showGate('login','')}
 $('out').addEventListener('click',signOut);$('out2').addEventListener('click',signOut);
 function authMsg(error){
   const m=(error&&error.message)||'';
   if(/invalid login credentials/i.test(m))return 'That email and password do not match. Check both, or use Forgot password? to set a new one.';
   if(/not confirmed/i.test(m))return 'This email address has not been confirmed yet. Ask the family admin to confirm it.';
+  if(/already registered|already been registered|already exists/i.test(m))return 'That email already has a login. Log in instead, or use Forgot password? to set a new password.';
   if(/rate limit|security purposes|too many/i.test(m))return 'Too many attempts just now. Please wait a few minutes and try again.';
   if(/fetch|network|load failed/i.test(m))return 'Could not reach the sign-in service. Check your internet connection. If this page is open inside a preview window, open the file in Chrome or Edge instead.';
   return m||'Something went wrong. Please try again.';
@@ -835,6 +1213,44 @@ async function setNewPassword(){
   $('rpass').value='';$('rpass2').value='';$('rcode').value='';
   enter();
 }
+async function showAccess(){
+  let acc=null;
+  try{
+    acc=await rpc('my_access');
+    if(!acc){
+      let nm='',ab='';
+      try{const u=(await sb.auth.getUser()).data.user;nm=(u.user_metadata&&u.user_metadata.full_name)||u.email||'';ab=(u.user_metadata&&u.user_metadata.about)||''}catch(_){}
+      acc=await rpc('request_access',{p_name:nm||'New member',p_about:ab||null});
+    }
+  }catch(e){showGate('login',String(e.message||e),true);return}
+  const st=acc&&acc.status;
+  $('pendtxt').textContent=st==='declined'?'Your request to join was not approved. If you think this is a mistake, please contact a family admin.':
+    st==='approved'?'Your access is switched off at the moment. Please contact a family admin.':
+    'Thank you'+(acc&&acc.full_name?', '+acc.full_name:'')+'. Your request to join is with the family admins. You will be able to enter as soon as it is approved.';
+  showGate('notmember',inviteErr,true);inviteErr='';
+}
+$('pcheck').addEventListener('click',()=>enter());
+$('toreg').addEventListener('click',()=>{$('gemail').value=$('email').value;showGate('register','')});
+$('regback').addEventListener('click',()=>showGate('login',''));
+let registering=false;
+async function doRegister(){
+  if(registering)return;
+  const nm=$('gname').value.trim(),em=$('gemail').value.trim(),pw=$('gpass').value,ab=$('gabout').value.trim();
+  if(nm.length<2){showGate('register','Enter your full name.',true);return}
+  if(!/^\S+@\S+\.\S+$/.test(em)){showGate('register','Enter your email address.',true);return}
+  if(pw.length<8){showGate('register','Choose a password of at least 8 characters.',true);return}
+  registering=true;$('regbtn').disabled=true;showGate('register','Sending your request…');
+  let r;try{r=await sb.auth.signUp({email:em,password:pw,options:{data:{full_name:nm,about:ab}}})}catch(err){r={error:err}}
+  registering=false;$('regbtn').disabled=false;
+  if(r.error){showGate('register',authMsg(r.error),true);return}
+  $('gpass').value='';
+  if(r.data&&r.data.session){enter();return}
+  $('email').value=em;
+  showGate('login','Almost done. We sent a confirmation email to '+em+'. Open it, then log in here.');
+}
+$('regbtn').addEventListener('click',doRegister);
+$('register').addEventListener('submit',e=>e.preventDefault());
+$('register').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'){e.preventDefault();doRegister()}});
 $('forgot').addEventListener('click',()=>{$('remail').value=$('email').value;showReset(1,'')});
 $('rback').addEventListener('click',()=>showGate('login',''));
 $('rresend').addEventListener('click',sendCode);
@@ -847,7 +1263,9 @@ $('reset').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==
   if(!window.supabase){showGate('wait','Could not reach the sign-in service. Check your internet connection and reload.',true);return}
   sb=window.supabase.createClient(CFG.url,CFG.key);
   const {data}=await sb.auth.getSession();
-  if(data&&data.session)enter();else showGate('login','');
+  if(data&&data.session)enter();
+  else if(inviteTok)showGate('register','You have been invited to join. Create your login below.');
+  else showGate('login','');
 })();
 </script>
 </body>
