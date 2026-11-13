@@ -175,6 +175,16 @@ h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
 .match dt{color:var(--muted)}.match dd{margin:0;font-weight:600}
 .help{font-size:12.5px;color:var(--muted);margin:10px 0 0}
 .empty{display:none}
+.sugg{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:-4px;background:var(--paper)}
+.sugg:empty{display:none}
+.sugg button{text-align:left;border:0;border-bottom:1px solid var(--ivory);background:none;padding:9px 12px;min-height:44px;font-weight:600}
+.sugg button small{display:block;font-weight:400;color:var(--muted);font-size:12.5px}
+.sugg button.none{color:var(--muted);font-weight:400}
+.sect{border-top:1px solid var(--line);margin-top:16px;padding-top:4px}
+.seg.wrap{flex-wrap:wrap}.seg.wrap button{flex:1 1 44%}
+textarea.field{height:auto;min-height:84px;padding:10px 14px;resize:vertical}
+.picked{display:flex;align-items:center;gap:8px;border:1.5px solid var(--gold);border-radius:12px;padding:8px 12px;background:var(--ivory)}
+.picked span{flex:1;min-width:0;font-weight:600}.picked small{display:block;font-weight:400;color:var(--muted)}
 .drow{display:grid;grid-template-columns:80px 1fr 88px;gap:8px}
 .drow .field{padding:0 8px;min-width:0}
 .pick{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
@@ -249,7 +259,7 @@ h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
       <div class="acts" style="justify-content:center"><button class="btn pri" id="pcheck" type="button">Check again</button><button class="btn" id="out2" type="button">Sign out</button></div>
     </div>
     <p class="msg info" id="gatemsg">Opening the family archive…</p>
-    <p class="ver">Ref K7M4</p>
+    <p class="ver">Ref H9RW</p>
   </div>
 </div>
 
@@ -310,7 +320,9 @@ let P={},UN=[],UNK=new Set(),KIDS={},ME=null,ROLE='member',ROOT=null,rootAnchor=
 const SEX={male:'m',female:'f',unknown:'u'},SEXF={m:'male',f:'female',u:'unknown'};
 function ingest(s){
   P={};
-  for(const r of s.persons)P[r.id]={id:r.id,name:r.full_name,given:r.given_name,family:r.family_name||'',known:r.known_as||'',s:SEX[r.sex]||'u',b:r.birth_year,bp:r.birth_precision,d:r.death_year,living:r.is_living,status:r.status,v:r.status==='verified',photo:r.has_photo,bd:r.birth||null,dd:r.death||null,par:[]};
+  for(const r of s.persons)P[r.id]={id:r.id,name:r.full_name,given:r.given_name,family:r.family_name||'',known:r.known_as||'',s:SEX[r.sex]||'u',b:r.birth_year,bp:r.birth_precision,d:r.death_year,living:r.is_living,status:r.status,v:r.status==='verified',photo:r.has_photo,bd:r.birth||null,dd:r.death||null,
+    fn:r.first_name||'',sn:r.surname||'',ur:r.name_native||'',ms:r.marital_status||null,occ:r.occupation||'',edu:r.education||'',bio:r.biography||'',
+    bpl:r.birth_place||'',cpl:r.current_place||'',upl:r.burial_place||'',par:[]};
   for(const l of s.links)if(P[l.child_id]&&P[l.parent_id])P[l.child_id].par.push(l.parent_id);
   UN=s.unions.filter(u=>P[u.a]&&P[u.b]).map(u=>[u.a,u.b]);
   UD={};for(const u of s.unions)UD[ukey(u.a,u.b)]={marriage:u.marriage||null,engagement:u.engagement||null};
@@ -389,6 +401,23 @@ function readDate(px,label){
   return {year:y,month:m,day:d,about:!!(y&&!m&&$(px+'_about').checked),hijri_year:hy,hijri_month:hm,hijri_day:hd,
     hijri_confirmed:!!((hm||hy)&&$(px+'_note').dataset.auto!=='1'),calendar:(y||m)?'gregorian':((hm||hy)?'hijri':'gregorian')};
 }
+const MSTEXT={single:'Single',married:'Married',widowed:'Spouse has passed away'};
+function detailsHTML(id){
+  const p=P[id],r=[];
+  if(p.ur)r.push(['Name in Urdu',p.ur]);
+  if(p.known)r.push(['Known as',p.known]);
+  if(p.fn)r.push(['First name',p.fn]);
+  if(p.family)r.push(['Last name',p.family]);
+  if(p.sn)r.push(['Surname',p.sn]);
+  if(MSTEXT[p.ms])r.push(['Marital status',MSTEXT[p.ms]]);
+  if(p.bpl)r.push(['Place of birth',p.bpl]);
+  if(p.cpl)r.push(['Lives in',p.cpl]);
+  if(p.upl)r.push(['Place of burial',p.upl]);
+  if(p.occ)r.push(['Occupation',p.occ]);
+  if(p.edu)r.push(['Education',p.edu]);
+  return (r.length?'<h3>Details</h3><dl class="dates">'+r.map(x=>'<dt>'+esc(x[0])+'</dt><dd>'+esc(x[1])+'</dd>').join('')+'</dl>':'')+
+    (p.bio?'<h3>About</h3><p style="margin:0;font-size:13.5px;white-space:pre-wrap">'+esc(p.bio)+'</p>':'');
+}
 function datesHTML(id){
   const p=P[id],rows=[];
   if(hasDate(p.bd))rows.push(['Born',p.bd]);
@@ -430,7 +459,9 @@ function buildTree(){
 const tkids=id=>kids(id).filter(k=>TP[k]===id);
 const inTree=id=>TREE.has(id);
 const host=id=>!id||!P[id]?null:(inTree(id)?id:(spouses(id).find(inTree)||null));
-const first=id=>P[id].given;
+const TITLE=/^(syed|sayed|saiyed|sayyid|sayyed|mirza|mir|shaikh|sheikh|shaikha|haji|hajji|dr\.?|begum)$/i;
+const words=n=>n.split(/\s+/).filter(w=>w&&!TITLE.test(w));
+const first=id=>P[id].fn||words(P[id].given)[0]||P[id].given;
 function descCount(id,seen){seen=seen||new Set();let n=0;for(const k of tkids(id))if(!seen.has(k)){seen.add(k);n+=1+descCount(k,seen)}return n}
 function ancMap(id){const m=new Map([[id,{d:0,first:null}]]),q=[id];while(q.length){const c=q.shift(),e=m.get(c);for(const p of P[c].par)if(!m.has(p)){m.set(p,{d:e.d+1,first:e.first||p});q.push(p)}}return m}
 function blood(a,b){const A=ancMap(a),B=ancMap(b);let best=null;for(const [k,v] of A){const w=B.get(k);if(w&&(!best||v.d+w.d<best.d1+best.d2))best={d1:v.d,d2:w.d,first:v.first}}return best}
@@ -470,7 +501,7 @@ function completeness(id){
   return {pct:Math.round(done/items.length*100),next:(items.find(i=>!i[1])||[])[0]};
 }
 const years=p=>{const a=p.b?((p.bp==='about'||p.bp==='decade')?'c. ':'')+p.b:'';if(p.d)return (a||'?')+'–'+p.d;if(p.living===false)return (a?'b. '+a+' · ':'')+'passed away';return a?'b. '+a:'Dates not recorded'};
-const initials=p=>((p.given[0]||'')+(p.family?p.family[0]:(p.given.split(' ')[1]||'')[0]||'')).toUpperCase();
+const initials=p=>{const w=words(p.given);return ((w[0]||p.given)[0]+((w[1]||'')[0]||'')).toUpperCase()};
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const nameKey=n=>{const t=n.trim().toLowerCase().split(/\s+/).filter(w=>!/^(syed|sayed|saiyed|sayyid|mirza)$/.test(w))[0]||'';return t[0]?t[0]+t.slice(1).replace(/[aeiouy]/g,'').replace(/(.)\1+/g,'$1'):''};
 
@@ -657,7 +688,7 @@ async function busy(fn){
 const chip=id=>'<button class="chip" data-go="'+id+'">'+esc(P[id].name)+'</button>';
 const who=id=>id===ME?'your':esc(first(id))+'’s';
 function renderSheet(){
-  if(!flow&&!Object.keys(P).length)flow={step:'first',given:'',family:'',sex:'m'};
+  if(!flow&&!Object.keys(P).length){openForm({mode:'add',rel:'first'});return}
   if(flow){renderFlow();sheet.classList.add('on');return}
   if(!sel||!P[sel]){
     body.innerHTML='<div class="empty"><h2>Explore the family</h2><p class="help">Drag to move around. Scroll or pinch to zoom. Select a person to open their branch, see their details and add their relatives.</p><p class="help">The gold ring around each person shows how complete their record is. A diamond marks a verified record; a dashed outline means not yet verified.</p></div>';
@@ -674,7 +705,7 @@ function renderSheet(){
     '<div class="pills">'+(rel?'<span class="pill rel">'+(rel==='You'?'This is you':esc('Your '+rel.charAt(0).toLowerCase()+rel.slice(1)))+'</span>':'')+
       (p.status==='pending'?'<span class="pill wn">With moderators</span>':p.v?'<span class="pill ok">◆ Verified</span>':'<span class="pill wn">Unverified</span>')+'</div>'+
     '<div class="comp"><div class="meter"><i style="width:'+c.pct+'%"></i></div>Record '+c.pct+'% complete'+(c.next?'. Still needed: '+c.next+'.':'.')+'</div>'+
-    datesHTML(sel)+
+    datesHTML(sel)+detailsHTML(sel)+
     '<h3>Parents</h3>'+(p.par.length?'<div class="chips">'+p.par.map(chip).join('')+'</div>':'<div class="none">Not recorded yet</div>')+
     '<h3>'+(sp.length>1?'Spouses':'Spouse')+'</h3>'+(sp.length?'<div class="chips">'+sp.map(chip).join('')+'</div>':'<div class="none">Not recorded yet</div>')+
     (sib.length?'<h3>Brothers and sisters</h3><div class="chips">'+sib.map(chip).join('')+'</div>':'')+
@@ -682,8 +713,7 @@ function renderSheet(){
     (linkUser?'<div class="match" style="margin-top:14px"><b>Connect '+esc(linkUser.label)+' to '+esc(p.name)+'?</b><p class="help" style="margin:4px 0 0">This tells the archive that this login belongs to this person.</p><div class="acts" style="margin-top:8px"><button class="btn pri" data-act="link-yes">Connect</button><button class="btn txt" data-act="link-no">Cancel</button></div></div>':'')+
     (myClaim&&myClaim.person_id===sel?'<div class="match" style="margin-top:14px"><b>You have asked to be connected to this record.</b><p class="help" style="margin:4px 0 0">A moderator will confirm it shortly.</p><div class="acts" style="margin-top:8px"><button class="btn txt" data-act="claim-cancel">Withdraw my request</button></div></div>':'')+
     (contrib?'<h3>Add to '+who(sel)+' family</h3><div class="chips">'+add.map(a=>'<button class="chip add" data-add="'+a[0]+'">+ '+a[1]+'</button>').join('')+'</div>':'')+
-    (contrib&&sp.length?'<div class="chips" style="margin-top:6px">'+sp.map(x=>'<button class="chip add" data-udates="'+x+'">Engagement and marriage dates'+(sp.length>1?': '+esc(P[x].given):'')+'</button>').join('')+'</div>':'')+
-    '<div class="acts">'+(contrib?'<button class="btn" data-act="edit">Edit details</button><button class="btn" data-act="dates">Edit dates</button>'+
+    '<div class="acts">'+(contrib?'<button class="btn" data-act="edit">Edit details</button>'+
       (!ME&&!myClaim?'<button class="btn" data-act="claim">This is me</button>':'')+
       (mod&&!p.v?'<button class="btn" data-act="verify">Mark as verified</button>':''):'')+
       (inTree(sel)&&tkids(sel).length?'<button class="btn" data-act="line">Open whole line</button>':'')+'</div>'+
@@ -714,8 +744,8 @@ function amsg(t,err){const m=$('admmsg');m.textContent=t||'';m.className='msg'+(
 async function act(fn){try{return await fn()}catch(e){amsg(String(e.message||e).replace(/^ERROR:\s*/,''),true);return undefined}}
 async function openAdmin(keep){
   let d;
-  try{d=await Promise.all([rpc('list_access_requests'),rpc('list_members'),rpc('list_invitations'),rpc('list_claims').catch(()=>[])])}catch(e){toast(String(e.message||e),true);return}
-  adm={reqs:d[0]||[],mems:d[1]||[],invs:d[2]||[],claims:d[3]||[],fresh:keep&&adm?adm.fresh:null};
+  try{d=await Promise.all([rpc('list_access_requests'),rpc('list_members'),rpc('list_invitations'),rpc('list_claims').catch(()=>[]),rpc('list_group_invites').catch(()=>[])])}catch(e){toast(String(e.message||e),true);return}
+  adm={reqs:d[0]||[],mems:d[1]||[],invs:d[2]||[],claims:d[3]||[],groups:d[4]||[],fresh:keep&&adm?adm.fresh:null,gfresh:keep&&adm?adm.gfresh:null};
   if(!keep)amsg('');
   renderAdmin();$('admin').hidden=false;
 }
@@ -723,6 +753,7 @@ function closeAdmin(){$('admin').hidden=true;adm=null}
 $('mmembers').addEventListener('click',()=>openAdmin());
 $('admclose').addEventListener('click',closeAdmin);
 const inviteUrl=t=>location.origin+location.pathname+'?invite='+t;
+const groupUrl=t=>location.origin+location.pathname+'?join='+t;
 function shareHTML(url){
   const text='You are invited to join Shajare Ahmed Online, our family archive. Open this link to create your login: '+url;
   return '<div class="linkbox"><input class="field" readonly value="'+esc(url)+'" aria-label="Invitation link">'+
@@ -749,6 +780,15 @@ function renderAdmin(){
     (a.fresh?'<p class="help" style="margin:12px 0 0;color:var(--ink)">Invitation for <b>'+esc(a.fresh.label)+'</b> is ready. Send it to them:</p>'+shareHTML(inviteUrl(a.fresh.token)):'')+
     (a.invs.length?'<h3 style="margin-top:16px">Open invitations ('+a.invs.length+')</h3>'+a.invs.map(i=>'<div class="row"><b>'+esc(i.label)+'</b><small>Created '+day(i.created_at)+' \u00b7 valid until '+day(i.expires_at)+'</small>'+
       '<div class="acts"><button class="btn" data-copy="'+esc(inviteUrl(i.token))+'">Copy link</button><button class="btn txt" data-revoke="'+i.id+'">Cancel invitation</button></div></div>').join(''):'')+'</div>'+
+
+    '<div class="panel"><h3>Group invitation link</h3><p class="help">One link for many relatives, for example a WhatsApp group. Each person who opens it creates their own login and comes straight in, with no approval step. Anyone who gets the link can join, so share it only with people you trust. You can cancel it at any time.</p>'+
+    '<div class="stack"><div class="lab">Name of the link</div><input class="field" id="glabel" autocomplete="off" placeholder="For example: Cousins group">'+
+    '<div class="lab">How many people may join with it</div><select class="field" id="gmax"><option value="">No limit</option><option value="5">5 people</option><option value="10">10 people</option><option value="25">25 people</option><option value="50">50 people</option></select>'+
+    '<div class="lab">Valid for</div><select class="field" id="gdays"><option value="7">7 days</option><option value="30" selected>30 days</option><option value="90">90 days</option></select></div>'+
+    '<div class="acts" style="margin-top:10px"><button class="btn pri" data-act="mkgrp">Create group link</button></div>'+
+    (a.gfresh?'<p class="help" style="margin:12px 0 0;color:var(--ink)">The link <b>'+esc(a.gfresh.label)+'</b> is ready. Share it with your group:</p>'+shareHTML(groupUrl(a.gfresh.token)):'')+
+    (a.groups.length?'<h3 style="margin-top:16px">Group links ('+a.groups.length+')</h3>'+a.groups.map(g=>'<div class="row"><b>'+esc(g.label)+'</b><small>'+g.uses+(g.max_uses?' of '+g.max_uses:'')+' joined \u00b7 '+(g.open?'open until '+day(g.expires_at):'closed')+'</small>'+
+      '<div class="acts"><button class="btn" data-copy="'+esc(groupUrl(g.token))+'">Copy link</button><button class="btn txt" data-grev="'+g.id+'">Cancel link</button></div></div>').join(''):'')+'</div>'+
 
     '<div class="panel"><h3>Add a member directly</h3><p class="help">Creates a login with the email and password you choose, already approved. Give the details to the person privately.</p>'+
     '<div class="stack"><div class="lab">Full name</div><input class="field" id="dname" autocomplete="off">'+
@@ -779,11 +819,17 @@ $('admbody').addEventListener('click',async e=>{
   if(x=t.closest('[data-link]')){linkUser={id:x.dataset.link,label:x.dataset.label};closeAdmin();flow=null;renderSheet();toast('Now select the person in the tree who is '+linkUser.label);return}
   if(x=t.closest('[data-go]')){const id=x.dataset.go;closeAdmin();focus(id,{expand:true});return}
   if(x=t.closest('[data-revoke]')){if(await act(()=>rpc('revoke_invitation',{p_id:x.dataset.revoke}).then(()=>true))){adm.fresh=null;await openAdmin(true);amsg('Invitation cancelled.')}return}
+  if(x=t.closest('[data-grev]')){if(await act(()=>rpc('revoke_group_invite',{p_id:x.dataset.grev}).then(()=>true))){adm.gfresh=null;await openAdmin(true);amsg('Group link cancelled.')}return}
   if(x=t.closest('[data-copy]')){
     const url=x.dataset.copy;let ok=false;
     try{await navigator.clipboard.writeText(url);ok=true}catch(_){const i=x.parentElement.querySelector('input');if(i){i.focus();i.select()}}
     amsg(ok?'Link copied. Paste it into a message to the person.':'Select the link and copy it: '+url);return}
   if(!(x=t.closest('[data-act]')))return;
+  if(x.dataset.act==='mkgrp'){
+    const label=$('glabel').value.trim(),mx=$('gmax').value,dd=parseInt($('gdays').value,10);
+    const g=await act(()=>rpc('create_group_invite',{p_label:label,p_max_uses:mx?parseInt(mx,10):null,p_days:dd}));
+    if(g){adm.gfresh=g;await openAdmin(true);amsg('Group link created for '+g.label+'.')}
+  }
   if(x.dataset.act==='mkinv'){
     const label=$('ilabel').value.trim();
     const inv=await act(()=>rpc('create_invitation',{p_label:label,p_person:null}));
@@ -818,7 +864,164 @@ const QUESTION={
   sibling:id=>'What is the name of '+who(id)+' brother or sister?'
 };
 const RELWORD={father:'father',mother:'mother',spouse:'spouse',child:'child',sibling:'brother or sister'};
-function startFlow(rel,of){
+/* ---------- One entry form for adding and editing: it opens further fields as choices are made ---------- */
+function idLabel(id){
+  const p=P[id],f=father(id),m=mother(id),sp=spouses(id);
+  const child=p.s==='f'?'daughter of ':p.s==='m'?'son of ':'child of ';
+  if(f)return child+P[f].name;
+  if(m)return child+P[m].name;
+  if(sp.length)return (p.s==='f'?'wife of ':p.s==='m'?'husband of ':'spouse of ')+P[sp[0]].name;
+  return p.b?'born '+p.b:'no other details yet';
+}
+function matchesFor(q,sex,skip){
+  const t=q.trim().toLowerCase();if(t.length<2)return [];
+  const k=nameKey(t),out=[];
+  for(const p of Object.values(P)){
+    if(skip.includes(p.id))continue;
+    if(sex!=='u'&&p.s!=='u'&&p.s!==sex)continue;
+    const n=(p.name+' '+p.known+' '+p.fn).toLowerCase();
+    const r=n.startsWith(t)?0:n.includes(t)?1:(k.length>1&&n.split(' ').some(w=>nameKey(w)===k))?2:9;
+    if(r<9)out.push([r,p]);
+  }
+  return out.sort((a,b)=>a[0]-b[0]||a[1].name.localeCompare(b[1].name)).slice(0,5).map(x=>x[1]);
+}
+function suggHTML(list,slot){
+  if(!list.length)return '';
+  return list.map(p=>'<button type="button" data-pick="'+p.id+'" data-slot="'+slot+'">'+esc(p.name)+'<small>'+esc(idLabel(p.id))+'</small></button>').join('')+
+    '<button type="button" class="none" data-pick="" data-slot="'+slot+'">None of these, add as new</button>';
+}
+function snap(){
+  const o={};
+  body.querySelectorAll('input[id],select[id],textarea[id]').forEach(e=>{o[e.id]=e.type==='checkbox'?e.checked:e.value});
+  body.querySelectorAll('[id$="_note"]').forEach(e=>{o['@'+e.id]=[e.dataset.auto,e.dataset.g,e.textContent]});
+  return o;
+}
+function unsnap(o){
+  if(!o)return;
+  for(const k in o){
+    if(k[0]==='@'){const e=$(k.slice(1));if(e){e.dataset.auto=o[k][0];e.dataset.g=o[k][1];e.textContent=o[k][2]}continue}
+    const e=$(k);if(!e)continue;
+    if(e.type==='checkbox')e.checked=o[k];else e.value=o[k];
+  }
+}
+function reform(){const v=snap(),st=body.scrollTop;renderFlow();unsnap(v);body.scrollTop=st}
+const fseg=(name,opts,val,wrap)=>'<div class="seg'+(wrap?' wrap':'')+'">'+opts.map(o=>'<button type="button" data-fseg="'+name+'" data-v="'+o[0]+'" class="'+(val===o[0]?'on':'')+'">'+o[1]+'</button>').join('')+'</div>';
+const inp=(id,label,val,ph)=>'<div class="lab">'+label+'</div><input class="field" id="'+id+'" autocomplete="off" value="'+esc(val||'')+'"'+(ph?' placeholder="'+esc(ph)+'"':'')+'>';
+function openForm(o){
+  const f=Object.assign({step:'form',mode:'add',rel:null,of:null,id:null,sex:'m',living:'u',ms:'unknown',more:false,other:false,spouses:[],otherParent:null,pending:false,nk:0},o);
+  if(f.mode==='edit'){
+    const p=P[f.id];
+    f.sex=p.s;f.living=p.living===true?'y':(p.living===false||hasDate(p.dd))?'n':'u';
+    f.spouses=spouses(f.id).map(x=>({k:f.nk++,sid:x,eng:hasDate((UD[ukey(f.id,x)]||{}).engagement)}));
+    f.ms=p.ms||(f.spouses.length?'married':'unknown');
+    f.more=!!(p.fn||p.family||p.sn||p.ur||p.known);f.other=!!(p.bpl||p.cpl||p.occ||p.edu||p.bio);
+  }else{
+    const a=f.of?P[f.of]:null;
+    f.sex=f.rel==='father'?'m':f.rel==='mother'?'f':f.rel==='spouse'?(a.s==='m'?'f':a.s==='f'?'m':'u'):'m';
+    if(f.rel==='child'&&spouses(f.of).length>1)f.otherParent=spouses(f.of)[0];
+  }
+  flow=f;renderSheet();
+}
+function formHTML(f){
+  const ed=f.mode==='edit',p=ed?P[f.id]:null,rel=f.rel;
+  const title=ed?'Edit details':(rel==='first'?'Start the archive':'Add '+RELWORD[rel]);
+  const ask=ed?esc(p.name):(rel==='first'?'Who is the earliest ancestor you know of?':QUESTION[rel](f.of));
+  let h='<div class="step">'+title+'</div><p class="q">'+ask+'</p><div class="stack">'+
+    inp('xgiven','Given name (shown on the tree)',ed?p.given:'','For example: Syed Mahdi Ali')+
+    (ed?'':'<div class="sugg" id="xsg"></div>')+
+    (f.more?inp('xfirst','First name',ed?p.fn:'')+inp('xlast','Last name',ed?p.family:'')+inp('xsur','Surname',ed?p.sn:'')+inp('xurdu','Name in Urdu',ed?p.ur:'')+inp('xknown','Known as',ed?p.known:'')
+           :'<div class="chips"><button class="chip add" type="button" data-fopen="more">More name details</button></div>');
+  if(ed||rel==='first')h+='<div class="lab">Gender</div>'+fseg('sex',[['m','Male'],['f','Female']],f.sex);
+  else if(rel==='child')h+='<div class="lab">Son or daughter</div>'+fseg('sex',[['m','Son'],['f','Daughter']],f.sex);
+  else if(rel==='sibling')h+='<div class="lab">Brother or sister</div>'+fseg('sex',[['m','Brother'],['f','Sister']],f.sex);
+  else if(rel==='spouse'&&P[f.of].s==='u')h+='<div class="lab">Husband or wife</div>'+fseg('sex',[['m','Husband'],['f','Wife']],f.sex);
+  if(rel==='child'&&spouses(f.of).length>1)h+='<div class="lab">Other parent</div><div class="chips">'+spouses(f.of).map(x=>'<button type="button" class="chip'+(f.otherParent===x?' on':'')+'" data-fop="'+x+'">'+esc(P[x].name)+'</button>').join('')+'</div>';
+  h+='</div><div class="sect">'+dateEditor('db','Date of birth',ed?p.bd:null)+'</div>'+
+    '<div class="sect"><h3>Living</h3>'+fseg('living',[['y','Living'],['n','Passed away'],['u','Not known']],f.living)+
+    (f.living==='n'?dateEditor('dd','Date of passing',ed?p.dd:null)+'<div class="stack" style="margin-top:10px">'+inp('xburial','Place of burial',ed?p.upl:'')+'</div>':'')+'</div>'+
+    '<div class="sect"><h3>Marital status</h3>'+fseg('ms',[['single','Single'],['married','Married'],['widowed','Spouse has passed away'],['unknown','Not specified']],f.ms,true);
+  if(f.ms==='married'||f.ms==='widowed'){
+    f.spouses.forEach((b,i)=>{
+      const u=b.sid&&ed?(UD[ukey(f.id,b.sid)]||{}):{},k=b.k;
+      h+='<div class="sect"><h3>'+(f.spouses.length>1?'Marriage '+(i+1):(f.sex==='f'?'Husband':f.sex==='m'?'Wife':'Spouse'))+'</h3><div class="stack">'+
+        (b.sid?'<div class="picked"><span>'+esc(P[b.sid].name)+'<small>'+esc(idLabel(b.sid))+'</small></span></div>'
+         :b.pick?'<div class="picked"><span>'+esc(P[b.pick].name)+'<small>Already in the tree: '+esc(idLabel(b.pick))+'</small></span><button class="btn txt" type="button" data-unpick="'+k+'">Change</button></div>'
+         :inp('sn'+k,'Name',''))+(b.sid||b.pick?'':'<div class="sugg" id="sg'+k+'"></div>')+'</div>'+
+        dateEditor('mr'+k,'Date of marriage',u.marriage)+
+        (b.eng?dateEditor('en'+k,'Date of engagement',u.engagement):'<div class="chips" style="margin-top:10px"><button class="chip add" type="button" data-feng="'+k+'">Add engagement date</button></div>')+
+        (f.ms==='widowed'?dateEditor('sp'+k,'Spouse\u2019s date of passing',b.sid?P[b.sid].dd:(b.pick?P[b.pick].dd:null)):'')+'</div>';
+    });
+    h+='<div class="chips" style="margin-top:12px"><button class="chip add" type="button" data-fopen="marriage">Add another marriage</button></div>';
+  }
+  h+='</div><div class="sect"><h3>Other details</h3>'+
+    (f.other?'<div class="stack">'+inp('xbplace','Place of birth',ed?p.bpl:'')+inp('xcity','Current city',ed?p.cpl:'')+inp('xocc','Occupation',ed?p.occ:'')+inp('xedu','Education',ed?p.edu:'')+
+      '<div class="lab">Short note</div><textarea class="field" id="xnote">'+esc(ed?p.bio:'')+'</textarea></div>'
+     :'<div class="chips"><button class="chip add" type="button" data-fopen="other">Add places, occupation, education or a note</button></div>')+
+    '<div class="chips" style="margin-top:10px"><button class="chip add" type="button" data-act="photo-soon">Add a photo</button></div></div>'+
+    '<p class="help">Only the given name is needed. Everything else can be left blank and added later.</p>'+
+    '<div class="acts"><button class="btn pri" data-act="form-save">'+(ed?'Save changes':'Save')+'</button><button class="btn txt" data-act="cancel">Cancel</button></div>';
+  return h;
+}
+const sameDate=(o,r)=>{o=o||{};return (o.y||null)===r.year&&(o.m||null)===r.month&&(o.d||null)===r.day&&(o.hy||null)===r.hijri_year&&(o.hm||null)===r.hijri_month&&(o.hd||null)===r.hijri_day&&!!o.about===r.about};
+const emptyDate=r=>!r.year&&!r.month&&!r.hijri_month&&!r.hijri_year;
+async function saveForm(){
+  const f=flow,ed=f.mode==='edit',p=ed?P[f.id]:null,val=id=>$(id)?$(id).value.trim():undefined;
+  const given=val('xgiven');
+  if(!given||given.length<2){toast('Enter a given name to continue',true);$('xgiven').focus();return}
+  let birth,death=null;const sp=[];
+  try{
+    birth=readDate('db','Date of birth');
+    if(f.living==='n'&&$('dd_y'))death=readDate('dd','Date of passing');
+    if(f.ms==='married'||f.ms==='widowed')for(const b of f.spouses){
+      const o={b,name:b.sid||b.pick?null:val('sn'+b.k),mar:readDate('mr'+b.k,'Date of marriage'),eng:$('en'+b.k+'_y')?readDate('en'+b.k,'Date of engagement'):null,pass:$('sp'+b.k+'_y')?readDate('sp'+b.k,'Spouse\u2019s date of passing'):null};
+      if(!b.sid&&!b.pick&&!o.name){if(!emptyDate(o.mar)||(o.eng&&!emptyDate(o.eng))||(o.pass&&!emptyDate(o.pass)))throw new Error('Enter the spouse\u2019s name to go with those dates.');continue}
+      sp.push(o);
+    }
+  }catch(err){toast(err.message,true);return}
+  const ch={},put=(k,v,old)=>{if(v!==undefined&&v!==(old||''))ch[k]=v};
+  if(ed)put('given_name',given,p.given);
+  put('first_name',val('xfirst'),ed?p.fn:'');put('family_name',val('xlast'),ed?p.family:'');put('surname',val('xsur'),ed?p.sn:'');
+  put('name_native',val('xurdu'),ed?p.ur:'');put('known_as',val('xknown'),ed?p.known:'');
+  put('birth_place',val('xbplace'),ed?p.bpl:'');put('current_place',val('xcity'),ed?p.cpl:'');put('burial_place',val('xburial'),ed?p.upl:'');
+  put('occupation',val('xocc'),ed?p.occ:'');put('education',val('xedu'),ed?p.edu:'');put('biography',val('xnote'),ed?p.bio:'');
+  if(ed&&f.sex!==p.s)ch.sex=SEXF[f.sex];
+  const liv=f.living==='y'?true:f.living==='n'?false:null,was=ed?(p.living===undefined?null:p.living):null;
+  if(liv!==was)ch.is_living=liv;
+  if(f.ms!==(ed&&p.ms?p.ms:'unknown'))ch.marital_status=f.ms;
+  let id=f.id;
+  const ok=await busy(async()=>{
+    if(!ed){
+      id=f.rel==='first'?await rpc('add_person',{p_given:given,p_family:null,p_sex:SEXF[f.sex]})
+        :await rpc('add_relative',{p_anchor:f.of,p_relation:f.rel,p_given:given,p_family:null,p_sex:SEXF[f.sex],p_pending:!!f.pending,p_other_parent:f.otherParent});
+    }
+    if(ed&&liv===true&&hasDate(p.dd))await rpc('set_person_date',{p_id:id,p_which:'death',p_date:{}});
+    if(Object.keys(ch).length)await rpc('update_person',{p_id:id,p_changes:ch});
+    if(!sameDate(ed?p.bd:null,birth))await rpc('set_person_date',{p_id:id,p_which:'birth',p_date:birth});
+    if(death&&!sameDate(ed?p.dd:null,death))await rpc('set_person_date',{p_id:id,p_which:'death',p_date:death});
+    const osex=f.sex==='m'?'female':f.sex==='f'?'male':'unknown';
+    for(const o of sp){
+      let sid=o.b.sid;
+      if(!sid)sid=o.b.pick?await rpc('link_existing',{p_anchor:id,p_relation:'spouse',p_existing:o.b.pick,p_other_parent:null})
+                          :await rpc('add_relative',{p_anchor:id,p_relation:'spouse',p_given:o.name,p_family:null,p_sex:osex,p_pending:false,p_other_parent:null});
+      const u=o.b.sid&&ed?(UD[ukey(id,sid)]||{}):{};
+      if(!sameDate(u.marriage,o.mar))await rpc('set_union_date',{p_a:id,p_b:sid,p_which:'marriage',p_date:o.mar});
+      if(o.eng&&!sameDate(u.engagement,o.eng))await rpc('set_union_date',{p_a:id,p_b:sid,p_which:'engagement',p_date:o.eng});
+      if(f.ms==='widowed'){
+        const q=P[sid];
+        if(!q||q.living!==false)await rpc('update_person',{p_id:sid,p_changes:{is_living:false}});
+        if(o.pass&&!emptyDate(o.pass)&&!sameDate(q?q.dd:null,o.pass))await rpc('set_person_date',{p_id:sid,p_which:'death',p_date:o.pass});
+      }
+    }
+    return true});
+  if(!ok){if(!ed&&id){await busy(refresh);if(P[id]){flow=null;focus(id,{expand:true})}}return}
+  await busy(refresh);
+  if(ed){flow=null;layout();run();renderSheet();toast('Saved');return}
+  flow={step:'done',rel:f.rel,of:f.rel==='first'?id:f.of,newId:id};sel=id;
+  if(!host(id)){rootAnchor=id;buildTree()}
+  const hh=host(id);reveal(hh);if(TP[hh])expanded.add(TP[hh]);expanded.add(hh);if(f.rel==='child')expanded.add(host(f.of));
+  layout();renderSheet();run(viewFor(tgt[id]?id:hh));
+}
+function startFlow(rel,of){openForm({mode:'add',rel,of});return;
   const o=P[of],f=father(of);
   flow={rel,of,step:'name',given:'',family:'',est:false,otherParent:null,
     sex:rel==='father'?'m':rel==='mother'?'f':rel==='spouse'?(o.s==='m'?'f':o.s==='f'?'m':'u'):'m'};
@@ -830,7 +1033,8 @@ function startFlow(rel,of){
 function seg(name,opts,val){return '<div class="seg">'+opts.map(o=>'<button type="button" data-'+name+'="'+o[0]+'" class="'+(val===o[0]?'on':'')+'">'+o[1]+'</button>').join('')+'</div>'}
 function renderFlow(){
   const f=flow;let h='';
-  if(f.step==='claimintro'){
+  if(f.step==='form'){h=formHTML(f)}
+  else if(f.step==='claimintro'){
     h='<div class="step">Before you start</div><p class="q">Are you in the family tree?</p>'+
       '<p class="help" style="font-size:13.5px;color:var(--ink)">If you find your own record and choose <b>This is me</b>, the archive will open on your own family and show how each person is related to you. A moderator confirms it first.</p>'+
       '<p class="help">A relative may already have added you, so search for your name first. If you are not there yet, select a relative such as your father and add yourself as their child.</p>'+
@@ -918,7 +1122,7 @@ function renderFlow(){
       '<div class="acts"><button class="btn pri" data-act="udates-save">Save dates</button><button class="btn txt" data-act="cancel">Cancel</button></div>';
   }
   body.innerHTML=h;body.scrollTop=0;
-  const inp=body.querySelector('.field');if(inp&&desktop()&&!/edit|dates/.test(f.step))inp.focus();
+  const inp=f.step==='form'?null:body.querySelector('.field');if(inp&&desktop()&&!/edit|dates|form/.test(f.step))inp.focus();
 }
 function keepInputs(){
   const f=flow;if(!f)return;
@@ -952,6 +1156,29 @@ body.addEventListener('click',async e=>{
   const go=e.target.closest('[data-go]');if(go){focus(go.dataset.go,{expand:true});return}
   const ad=e.target.closest('[data-add]');if(ad){startFlow(ad.dataset.add,sel);return}
   const nx=e.target.closest('[data-next]');if(nx){startFlow(nx.dataset.next,nx.dataset.of);return}
+  const fs=e.target.closest('[data-fseg]');
+  if(fs){
+    const n=fs.dataset.fseg;flow[n]=fs.dataset.v;
+    if(n==='ms'&&(flow.ms==='married'||flow.ms==='widowed')&&!flow.spouses.length)flow.spouses.push({k:flow.nk++});
+    reform();return;
+  }
+  const fo=e.target.closest('[data-fopen]');
+  if(fo){if(fo.dataset.fopen==='marriage')flow.spouses.push({k:flow.nk++});else flow[fo.dataset.fopen]=true;reform();return}
+  const fe=e.target.closest('[data-feng]');if(fe){flow.spouses.find(b=>String(b.k)===fe.dataset.feng).eng=true;reform();return}
+  const fp=e.target.closest('[data-fop]');if(fp){flow.otherParent=fp.dataset.fop;reform();return}
+  const un=e.target.closest('[data-unpick]');if(un){flow.spouses.find(b=>String(b.k)===un.dataset.unpick).pick=null;reform();return}
+  const pk=e.target.closest('[data-pick]');
+  if(pk){
+    const slot=pk.dataset.slot,id=pk.dataset.pick;
+    if(!id){(slot==='main'?$('xsg'):$('sg'+slot)).innerHTML='';return}
+    if(slot==='main'){
+      const q=P[id];
+      flow.snapv=snap();flow.given=$('xgiven').value;flow.family='';
+      flow.match={id,full_name:q.name,parents:q.par.map(x=>P[x].name),birth_year:q.b,death_year:q.d,is_living:q.living,spouses:spouses(id).map(x=>P[x].name),children:kids(id).map(x=>first(x))};
+      flow.step='dup';renderFlow();
+    }else{flow.spouses.find(b=>String(b.k)===slot).pick=id;reform()}
+    return;
+  }
   const ud=e.target.closest('[data-udates]');if(ud){flow={step:'udates',of:sel,sp:ud.dataset.udates};renderSheet();return}
   const cl=e.target.closest('[data-cal]');
   if(cl){
@@ -967,7 +1194,9 @@ body.addEventListener('click',async e=>{
   const el=e.target.closest('[data-eliv]');if(el){keepInputs();f.eliv=el.dataset.eliv;renderFlow();restoreEdit();return}
   const b=e.target.closest('[data-act]');if(!b)return;
   const a=b.dataset.act;
-  if(a==='edit'){const p=P[sel];flow={step:'edit',of:sel,esex:p.s,eliv:p.living===true?'y':(p.living===false||p.d)?'n':'u'};renderSheet()}
+  if(a==='edit'){openForm({mode:'edit',id:sel})}
+  else if(a==='form-save'){await saveForm()}
+  else if(a==='photo-soon'){toast('Photos: this feature is coming soon')}
   else if(a==='verify'){const id=sel;if(await busy(()=>rpc('update_person',{p_id:id,p_changes:{status:'verified'}}).then(()=>true))){await busy(refresh);layout();run();renderSheet();toast(first(id)+' is now verified')}}
   else if(a==='line'){(function open(id){expanded.add(id);tkids(id).forEach(open)})(sel);layout();run(viewFor(sel,Math.min(view.k,0.6)));toast('Opened every generation below '+first(sel))}
   else if(a==='cancel'){flow=null;renderSheet()}
@@ -1008,8 +1237,8 @@ body.addEventListener('click',async e=>{
     await busy(refresh);flow=null;focus(m.id,{expand:true});
     toast('No new record created. '+m.full_name+' is now connected.');
   }
-  else if(a==='dup-diff')await createPerson(false);
-  else if(a==='dup-unsure'){await createPerson(true);if(flow&&flow.newId)toast('Saved, and flagged for the moderators to check')}
+  else if(a==='dup-diff'){f.step='form';f.pending=false;renderFlow();unsnap(f.snapv)}
+  else if(a==='dup-unsure'){f.step='form';f.pending=true;renderFlow();unsnap(f.snapv);toast('Carry on. This entry will be flagged for the moderators to check.')}
   else if(a==='born-save'||a==='born-skip'){
     let ok;
     if(a==='born-save'){
@@ -1078,7 +1307,13 @@ body.addEventListener('click',async e=>{
   else if(a==='done'){const id=f.newId;flow=null;focus(id,{})}
 });
 function dateFieldChanged(e){
-  const m=/^(d[bdem])_(d|m|y|hd|hm|hy|pick)$/.exec(e.target.id||'');if(!m)return;
+  if(e.type==='input'&&flow&&flow.step==='form'){
+    const t=e.target;
+    if(t.id==='xgiven'&&$('xsg'))$('xsg').innerHTML=flow.rel==='first'?'':suggHTML(matchesFor(t.value,flow.sex,[flow.of]),'main');
+    const sm=/^sn(\d+)$/.exec(t.id||'');
+    if(sm&&$('sg'+sm[1]))$('sg'+sm[1]).innerHTML=suggHTML(matchesFor(t.value,flow.sex==='m'?'f':flow.sex==='f'?'m':'u',[flow.id,flow.of].filter(Boolean)),sm[1]);
+  }
+  const m=/^([a-z]{2}\d*)_(d|m|y|hd|hm|hy|pick)$/.exec(e.target.id||'');if(!m)return;
   const px=m[1],k=m[2];
   if(k==='pick'){
     const p=/^(\d{4})-(\d{2})-(\d{2})$/.exec(e.target.value||'');if(!p)return;
@@ -1113,13 +1348,17 @@ $('findme').addEventListener('click',()=>{if(rootAnchor){rootAnchor=null;buildTr
 $('fit').addEventListener('click',fitAll);
 
 /* ---------- Sign-in and start ---------- */
-let inviteTok=null,inviteErr='';
+let inviteTok=null,joinTok=null,inviteErr='';
 try{
   const u=new URLSearchParams(location.search).get('invite');
   if(u){try{localStorage.setItem('sao-invite',u)}catch(_){}inviteTok=u;try{history.replaceState(null,'',location.pathname)}catch(_){}}
   else{try{inviteTok=localStorage.getItem('sao-invite')}catch(_){}}
+  const j=new URLSearchParams(location.search).get('join');
+  if(j){try{localStorage.setItem('sao-join',j)}catch(_){}joinTok=j;try{history.replaceState(null,'',location.pathname)}catch(_){}}
+  else{try{joinTok=localStorage.getItem('sao-join')}catch(_){}}
 }catch(_){}
 function dropInvite(){inviteTok=null;try{localStorage.removeItem('sao-invite')}catch(_){}}
+function dropJoin(){joinTok=null;try{localStorage.removeItem('sao-join')}catch(_){}}
 const gate=$('gate'),gatemsg=$('gatemsg');
 function showGate(mode,msg,isErr){
   gate.hidden=false;$('login').hidden=mode!=='login';$('notmember').hidden=mode!=='notmember';$('reset').hidden=mode!=='reset';$('register').hidden=mode!=='register';
@@ -1133,8 +1372,12 @@ async function enter(){
     const t=inviteTok;dropInvite();
     try{await rpc('accept_invitation',{p_token:t});return enter()}catch(e){inviteErr=String(e.message||e).replace(/^ERROR:\s*/,'')}
   }
+  if(!me&&joinTok){
+    const t=joinTok;dropJoin();
+    try{await rpc('accept_group_invite',{p_token:t});return enter()}catch(e){inviteErr=String(e.message||e).replace(/^ERROR:\s*/,'')}
+  }
   if(!me){await showAccess();return}
-  dropInvite();
+  dropInvite();dropJoin();
   ME=me.person_id||null;ROLE=me.role;
   try{await refresh()}catch(e){showGate('login',String(e.message||e),true);return}
   myClaim=null;
@@ -1264,7 +1507,7 @@ $('reset').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==
   sb=window.supabase.createClient(CFG.url,CFG.key);
   const {data}=await sb.auth.getSession();
   if(data&&data.session)enter();
-  else if(inviteTok)showGate('register','You have been invited to join. Create your login below.');
+  else if(inviteTok||joinTok)showGate('register','You have been invited to join. Create your login below.');
   else showGate('login','');
 })();
 </script>
