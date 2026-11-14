@@ -204,6 +204,72 @@ textarea.field{height:auto;min-height:84px;padding:10px 14px;resize:vertical}
   .brand b{font-size:19px}
 }
 @media (prefers-reduced-motion:reduce){#sheet,.toast{transition:none}}
+
+/* Family Calendar */
+#cal{position:absolute;inset:0;z-index:12;background:var(--ivory);overflow-y:auto;-webkit-overflow-scrolling:touch}
+.calwrap{max-width:1040px;margin:0 auto;padding:16px 16px 48px}
+#calmsg{text-align:left;margin:6px 0 0}
+.calbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+.calbar .seg{flex:none}
+.calbar .seg button{flex:none;min-height:40px;padding:0 16px}
+.calbar .chip.on{background:var(--gold);border-color:var(--gold-deep);color:#fff}
+.calbar select.field{width:auto;height:40px;font-size:14px;padding:0 10px;border-radius:999px}
+.calcols{display:grid;gap:0 14px;grid-template-columns:minmax(0,1fr)}
+.calnav{display:flex;align-items:center;gap:6px;margin:0 0 10px}
+.calnav b{flex:1;min-width:0;text-align:center;font-family:var(--display);color:var(--gold-deep);font-size:17px;letter-spacing:.04em}
+.calnav b small{display:block;font-family:var(--body);font-weight:400;font-size:12px;color:var(--muted);letter-spacing:0}
+.calnav button{flex:none;width:40px;height:40px;border-radius:50%;border:1.5px solid var(--gold);background:var(--paper);color:var(--gold-deep);font-size:18px;font-weight:700;line-height:1}
+.calnav button.now{width:auto;border-radius:999px;padding:0 12px;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.grid .wd{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:center;font-weight:700;padding:2px 0}
+.day{min-height:60px;border:1px solid var(--line);border-radius:10px;background:var(--ivory);padding:4px 5px;text-align:left;display:flex;flex-direction:column;gap:1px;min-width:0;overflow:hidden}
+.day b{font-size:14px;font-variant-numeric:tabular-nums;line-height:1.2}
+.day small{font-size:10px;color:var(--muted);line-height:1.1;white-space:nowrap}
+.day .mk{margin-top:auto;font-size:12px;line-height:1.3;white-space:nowrap;font-weight:700;color:var(--gold-deep)}
+.day.has{background:#fff;border-color:var(--gold)}
+.day.now{box-shadow:inset 0 0 0 2px var(--gold)}
+.day.pick{background:var(--gold);border-color:var(--gold-deep);color:#fff}
+.day.pick small,.day.pick .mk{color:#fff}
+.day.blank{border:0;background:none;min-height:0}
+.evrow{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:8px;background:var(--ivory);min-height:52px}
+.evrow .when{flex:none;width:68px;font-weight:700;font-size:13px;color:var(--gold-deep);font-variant-numeric:tabular-nums}
+.evrow .when small{display:block;font-weight:400;color:var(--muted);font-size:11.5px}
+.evrow .ic{flex:none;font-size:19px;line-height:1.15}
+.evrow .what{flex:1;min-width:0}
+.evrow .what b{display:block;overflow-wrap:anywhere;font-size:14px}
+.evrow .what small{display:block;color:var(--muted);font-size:12.5px;overflow-wrap:anywhere}
+.tag{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--warn);border:1px dashed currentColor;border-radius:999px;padding:0 7px;margin-top:4px}
+.upill{position:absolute;right:12px;bottom:10px;z-index:4;border:1.5px solid var(--gold);background:var(--paper);color:var(--gold-deep);border-radius:999px;padding:0 14px;font-size:13px;font-weight:700;min-height:40px;box-shadow:0 3px 10px rgba(122,92,16,.15)}
+#upop{position:absolute;right:12px;bottom:58px;z-index:7;width:min(360px,calc(100% - 24px));max-height:62%;overflow-y:auto;background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:0 8px 22px rgba(122,92,16,.25);padding:14px;cursor:default;touch-action:pan-y}
+#upop h2{font-size:16px}
+#upop .acts{margin-top:8px}
+#evd{position:fixed;inset:0;z-index:40;background:rgba(58,46,20,.45);display:flex;align-items:flex-end;justify-content:center}
+#evbox{background:var(--paper);border-top:2px solid var(--gold);border-radius:20px 20px 0 0;width:min(480px,100%);max-height:88%;overflow-y:auto;padding:18px 20px 22px}
+#evbox .kind{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;margin:0 0 6px}
+#evbox .dates{margin-top:14px}
+@media (min-width:600px){#evd{align-items:center}#evbox{border-radius:20px;border:2px solid var(--gold)}}
+@media (min-width:900px){.calcols{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);align-items:start}.day{min-height:74px}}
+#printout{display:none}
+@media print{
+  @page{size:A4 landscape;margin:10mm}
+  html,body{height:auto}
+  body{display:block;overflow:visible;background:#fff}
+  body>*{display:none!important}
+  body>#printout{display:block!important;color:#000;font-family:var(--body)}
+  .phead{display:flex;align-items:center;gap:12px;border-bottom:2px solid var(--gold);padding-bottom:6px;margin-bottom:8px}
+  .phead img{width:54px;height:54px;border-radius:50%}
+  .phead b{font-family:var(--display);font-size:20px;color:var(--gold-deep);letter-spacing:.05em;display:block}
+  .phead span{font-size:13px}
+  .phead .pm{margin-left:auto;text-align:right;font-family:var(--display);font-size:20px;color:var(--gold-deep)}
+  .phead .pm small{display:block;font-family:var(--body);font-size:11px;color:#444}
+  .ptab{width:100%;border-collapse:collapse;table-layout:fixed}
+  .ptab th{font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:3px;border:1px solid #999;background:#f3ecd6;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .ptab td{border:1px solid #999;vertical-align:top;height:25mm;padding:3px 4px;font-size:9.5px;line-height:1.25;overflow:hidden}
+  .ptab td b{font-size:13px}
+  .ptab td small{color:#555;font-size:8.5px;margin-left:4px}
+  .ptab td div{margin-top:2px;overflow-wrap:anywhere}
+  .pfoot{font-size:9px;color:#555;margin-top:6px}
+}
 </style>
 </head>
 <body>
@@ -259,7 +325,7 @@ textarea.field{height:auto;min-height:84px;padding:10px 14px;resize:vertical}
       <div class="acts" style="justify-content:center"><button class="btn pri" id="pcheck" type="button">Check again</button><button class="btn" id="out2" type="button">Sign out</button></div>
     </div>
     <p class="msg info" id="gatemsg">Opening the family archive…</p>
-    <p class="ver">Ref H9RW</p>
+    <p class="ver">Ref Q6ZD</p>
   </div>
 </div>
 
@@ -269,6 +335,7 @@ textarea.field{height:auto;min-height:84px;padding:10px 14px;resize:vertical}
   <button class="cbtn" id="contrib" type="button" aria-pressed="false">Contribute</button>
   <button class="out" id="menu" type="button" aria-label="Menu">⋯</button>
   <div class="menu" id="menupop" hidden>
+    <button id="mcal" type="button">Family Calendar</button>
     <button id="mmembers" type="button" hidden>Admin</button>
     <button id="out" type="button">Sign out</button>
   </div>
@@ -287,12 +354,21 @@ textarea.field{height:auto;min-height:84px;padding:10px 14px;resize:vertical}
       <button id="fit" aria-label="Show whole tree" title="Show whole tree"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
     </div>
     <div class="note" id="note"></div>
+    <button class="upill" id="upill" type="button" hidden></button>
+    <div id="upop" hidden></div>
     <div class="toast" id="toast" role="status"></div>
   </div>
   <aside id="sheet" aria-live="polite">
     <button class="x" id="close" aria-label="Close">&times;</button>
     <div id="body"></div>
   </aside>
+  <section id="cal" hidden>
+    <div class="calwrap">
+      <div class="admhead"><h2>Family Calendar</h2><button class="btn" id="calclose" type="button">Back to the tree</button></div>
+      <p class="msg info" id="calmsg" role="status"></p>
+      <div id="calbody"></div>
+    </div>
+  </section>
   <section id="admin" hidden>
     <div class="adm">
       <div class="admhead"><h2>Admin</h2><button class="btn" id="admclose" type="button">Back to the tree</button></div>
@@ -301,6 +377,9 @@ textarea.field{height:auto;min-height:84px;padding:10px 14px;resize:vertical}
     </div>
   </section>
 </main>
+
+<div id="evd" hidden><div id="evbox" role="dialog" aria-label="Event details"></div></div>
+<div id="printout"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
@@ -624,7 +703,7 @@ function note(){$('note').textContent=Object.keys(P).length+(Object.keys(P).leng
 /* ---------- Pan, pinch, wheel, tap ---------- */
 const ptrs=new Map();let moved=false,downTarget=null,pinch=null;
 stage.addEventListener('pointerdown',e=>{
-  if(e.target.closest('.search,.ctl'))return;
+  if(e.target.closest('.search,.ctl,.upill,#upop'))return;
   if(anim)anim.finish();
   ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
   if(ptrs.size===1){moved=false;downTarget=e.target}
@@ -653,7 +732,7 @@ function up(e){
   downTarget=null;
 }
 stage.addEventListener('pointerup',up);stage.addEventListener('pointercancel',up);
-stage.addEventListener('wheel',e=>{e.preventDefault();if(anim)anim.finish();const r=stage.getBoundingClientRect();zoomAt(e.clientX-r.left,e.clientY-r.top,Math.exp(-e.deltaY*0.0016))},{passive:false});
+stage.addEventListener('wheel',e=>{if(e.target.closest('#upop'))return;e.preventDefault();if(anim)anim.finish();const r=stage.getBoundingClientRect();zoomAt(e.clientX-r.left,e.clientY-r.top,Math.exp(-e.deltaY*0.0016))},{passive:false});
 stage.addEventListener('keydown',e=>{const n=e.target.closest&&e.target.closest('.node');if(n&&(e.key==='Enter'||e.key===' ')){e.preventDefault();tap(e.target)}});
 function tap(target){
   const n=target.closest('.node');
@@ -744,8 +823,8 @@ function amsg(t,err){const m=$('admmsg');m.textContent=t||'';m.className='msg'+(
 async function act(fn){try{return await fn()}catch(e){amsg(String(e.message||e).replace(/^ERROR:\s*/,''),true);return undefined}}
 async function openAdmin(keep){
   let d;
-  try{d=await Promise.all([rpc('list_access_requests'),rpc('list_members'),rpc('list_invitations'),rpc('list_claims').catch(()=>[]),rpc('list_group_invites').catch(()=>[])])}catch(e){toast(String(e.message||e),true);return}
-  adm={reqs:d[0]||[],mems:d[1]||[],invs:d[2]||[],claims:d[3]||[],groups:d[4]||[],fresh:keep&&adm?adm.fresh:null,gfresh:keep&&adm?adm.gfresh:null};
+  try{d=await Promise.all([rpc('list_access_requests'),rpc('list_members'),rpc('list_invitations'),rpc('list_claims').catch(()=>[]),rpc('list_group_invites').catch(()=>[]),rpc('list_hijri_offsets').catch(()=>[])])}catch(e){toast(String(e.message||e),true);return}
+  adm={reqs:d[0]||[],mems:d[1]||[],invs:d[2]||[],claims:d[3]||[],groups:d[4]||[],hoff:d[5]||[],fresh:keep&&adm?adm.fresh:null,gfresh:keep&&adm?adm.gfresh:null};
   if(!keep)amsg('');
   renderAdmin();$('admin').hidden=false;
 }
@@ -807,8 +886,16 @@ function renderAdmin(){
         b+='<button class="btn txt" data-active="'+(m.active?'0':'1')+'" data-user="'+m.user_id+'">'+(m.active?'Switch off access':'Switch access on')+'</button>';
       }
       return '<div class="row"><b>'+esc(m.full_name)+(m.is_me?' (you)':'')+'</b><small>'+esc(m.email||'')+'</small><small>'+role+(m.active?'':' \u00b7 access switched off')+' \u00b7 '+(m.person_name?'connected to '+esc(m.person_name):'not connected to a person in the tree')+'</small>'+(b?'<div class="acts">'+b+'</div>':'')+'</div>';
-    }).join('')+'</div>';
+    }).join('')+'</div>'+
+
+    '<div class="panel"><h3>Hijri dates by country</h3><p class="help">The calendar follows the Umm al-Qura calendar. Where the moon sighting usually falls a day later or earlier, set that here for the country. It moves the Hijri dates and reminders for members living there.</p>'+
+    (a.hoff.length?a.hoff.map(o=>'<div class="row"><b>'+esc(cname(o.country))+'</b><small>'+o.members+(o.members===1?' member':' members')+'</small><select class="field" data-hoff="'+o.country+'" aria-label="Adjustment for '+esc(cname(o.country))+'" style="margin-top:8px;height:42px;font-size:14px">'+[[-1,'One day earlier'],[0,'No adjustment'],[1,'One day later']].map(v=>opt(v[0],o.days,v[1])).join('')+'</select></div>').join(''):'<div class="none">No member has chosen a country yet.</div>')+'</div>';
 }
+$('admbody').addEventListener('change',async e=>{
+  const x=e.target.closest('[data-hoff]');if(!x)return;
+  const c=x.dataset.hoff;
+  if(await act(()=>rpc('set_hijri_offset',{p_country:c,p_days:parseInt(x.value,10)}).then(()=>true))){HMC=[];await openAdmin(true);amsg('Saved. Hijri dates for members in '+cname(c)+' are updated.');refreshPill()}
+});
 $('admbody').addEventListener('click',async e=>{
   const t=e.target;let x;
   if(x=t.closest('[data-req]')){const ok=x.dataset.ok==='1';if(await act(()=>rpc('decide_access',{p_user:x.dataset.req,p_approve:ok}).then(()=>true))){await openAdmin(true);amsg(ok?'Approved. They can sign in now.':'Request declined.')}return}
@@ -1034,6 +1121,7 @@ function seg(name,opts,val){return '<div class="seg">'+opts.map(o=>'<button type
 function renderFlow(){
   const f=flow;let h='';
   if(f.step==='form'){h=formHTML(f)}
+  else if(f.step==='locale'){h=localeHTML()}
   else if(f.step==='claimintro'){
     h='<div class="step">Before you start</div><p class="q">Are you in the family tree?</p>'+
       '<p class="help" style="font-size:13.5px;color:var(--ink)">If you find your own record and choose <b>This is me</b>, the archive will open on your own family and show how each person is related to you. A moderator confirms it first.</p>'+
@@ -1194,7 +1282,9 @@ body.addEventListener('click',async e=>{
   const el=e.target.closest('[data-eliv]');if(el){keepInputs();f.eliv=el.dataset.eliv;renderFlow();restoreEdit();return}
   const b=e.target.closest('[data-act]');if(!b)return;
   const a=b.dataset.act;
-  if(a==='edit'){openForm({mode:'edit',id:sel})}
+  if(a==='locale-save'){if(await busy(()=>saveLocale('l').then(()=>true))){flow=null;renderSheet();toast('Saved');refreshPill()}}
+  else if(a==='locale-later'){flow=null;renderSheet()}
+  else if(a==='edit'){openForm({mode:'edit',id:sel})}
   else if(a==='form-save'){await saveForm()}
   else if(a==='photo-soon'){toast('Photos: this feature is coming soon')}
   else if(a==='verify'){const id=sel;if(await busy(()=>rpc('update_person',{p_id:id,p_changes:{status:'verified'}}).then(()=>true))){await busy(refresh);layout();run();renderSheet();toast(first(id)+' is now verified')}}
@@ -1347,6 +1437,296 @@ $('findme').addEventListener('click',()=>{if(rootAnchor){rootAnchor=null;buildTr
   else if(ROOT)focus(ROOT,{k:1})});
 $('fit').addEventListener('click',fitAll);
 
+/* ---------- Family Calendar: a view of the dates already recorded in the tree ---------- */
+const DAY=86400000,WD=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],WDL=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const HMS=['Muh','Safar','Rabi I','Rabi II','Jum I','Jum II','Rajab','Shaban','Ram','Shaw','Dhu Q','Dhu H'];
+const CANDLE='\u{1F56F}\uFE0F',CAKE='\u{1F382}';
+const iso=t=>new Date(t).toISOString().slice(0,10);
+const pd=s=>Date.parse(s+'T00:00:00Z');
+const todayT=()=>{const n=new Date();return Date.UTC(n.getFullYear(),n.getMonth(),n.getDate())};
+const savedMode=()=>{try{return localStorage.getItem('sao-cal')==='hijri'?'hijri':'gregorian'}catch(_){return 'gregorian'}};
+let HMC=[],SET=null,CALOK=false,EVREG=[];      // HMC: Hijri months sent by the database
+const CAL={mode:savedMode(),y:0,m:0,hy:0,hm:0,type:'all',range:'month',pick:null,ev:[],list:[],up:[]};
+function addMonths(ms){
+  for(const m of ms||[])if(!HMC.some(x=>x.hy===m.hy&&x.hm===m.hm))HMC.push({hy:m.hy,hm:m.hm,t:pd(m.starts),days:m.days});
+  HMC.sort((a,b)=>a.t-b.t);
+}
+const hOf=t=>{for(const m of HMC)if(t>=m.t&&t<m.t+m.days*DAY)return {y:m.hy,m:m.hm,d:Math.round((t-m.t)/DAY)+1};return null};
+const hMonth=(hy,hm)=>HMC.find(m=>m.hy===hy&&m.hm===hm)||null;
+const gT=(t,long)=>{const d=new Date(t);return d.getUTCDate()+' '+(long?GM[d.getUTCMonth()]+' '+d.getUTCFullYear():GM[d.getUTCMonth()].slice(0,3))};
+const hT=(t,long)=>{const h=hOf(t);return h?h.d+' '+(long?HM[h.m-1]+' '+h.y+' AH':HMS[h.m-1]):''};
+const longG=o=>o&&o.m?(o.d?o.d+' ':'')+GM[o.m-1]+(o.y?' '+o.y:''):'';
+const longH=o=>o&&o.m?(o.d?o.d+' ':'')+HM[o.m-1]+(o.y?' '+o.y+' AH':''):'';
+async function loadEvents(from,to,cal){
+  const r=await rpc('family_events',{p_from:iso(from),p_to:iso(to),p_cal:cal||null});
+  addMonths(r.months);
+  return (r.events||[]).map(e=>Object.assign(e,{t:pd(e.on)}));
+}
+// Each view shows the events of its own calendar, plus people who have a date in the other calendar only.
+const inView=e=>e.cal===CAL.mode||e.only;
+const typeOk=e=>CAL.type==='all'||e.kind===CAL.type;
+const calErr=e=>{const m=String((e&&e.message)||e).replace(/^ERROR:\s*/,'');return /family_events|my_settings|schema cache|does not exist|could not find/i.test(m)?'The family calendar has not been switched on in the database yet. A family admin needs to run setup script 009.':m};
+function cmsg(t,err){const m=$('calmsg');m.textContent=t||'';m.className='msg'+(err?'':' info')}
+
+/* Country and time zone of the member */
+const ISO2='AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW';
+let CTRY=null;
+function countries(){
+  if(CTRY)return CTRY;
+  let dn=null;try{dn=new Intl.DisplayNames(['en'],{type:'region'})}catch(_){}
+  CTRY=ISO2.split(' ').map(c=>{let n=c;try{if(dn)n=dn.of(c)||c}catch(_){}return [c,n]}).sort((a,b)=>a[1].localeCompare(b[1]));
+  return CTRY;
+}
+const cname=c=>(countries().find(x=>x[0]===c)||[c,c])[1];
+const deviceTZ=()=>{try{return Intl.DateTimeFormat().resolvedOptions().timeZone||''}catch(_){return ''}};
+function localeFields(px){
+  const co=(SET&&SET.country)||'',tz=(SET&&SET.time_zone)||deviceTZ();
+  let tzs=[];try{tzs=Intl.supportedValuesOf('timeZone')}catch(_){}
+  if(tz&&!tzs.includes(tz))tzs=[tz].concat(tzs);
+  return '<div class="stack"><div class="lab">Country</div><select class="field" id="'+px+'co"><option value="">Choose a country</option>'+countries().map(c=>opt(c[0],co,esc(c[1]))).join('')+'</select>'+
+    '<div class="lab">Time zone</div><select class="field" id="'+px+'tz">'+tzs.map(z=>opt(z,tz,esc(z.replace(/_/g,' ')))).join('')+'</select></div>';
+}
+async function saveLocale(px){
+  const co=$(px+'co').value,tz=$(px+'tz').value;
+  if(!co)throw new Error('Choose your country.');
+  SET=await rpc('set_my_settings',{p_time_zone:tz||null,p_country:co});
+  HMC=[];           // Hijri dates can fall a day apart from one country to another
+}
+const localeHTML=()=>'<div class="step">One quick question</div><p class="q">Which country do you live in?</p>'+
+  '<p class="help" style="margin:0 0 12px">Family events and reminders are matched to your own day and time. You can change this later on the Family Calendar page.</p>'+localeFields('l')+
+  '<div class="acts"><button class="btn pri" data-act="locale-save">Save</button><button class="btn txt" data-act="locale-later">Not now</button></div>';
+async function loadSettings(){
+  try{SET=await rpc('my_settings')}catch(_){SET=null;return}
+  if(SET&&!SET.time_zone&&deviceTZ()){try{SET=await rpc('set_my_settings',{p_time_zone:deviceTZ(),p_country:null})}catch(_){}}
+}
+const localeAsked=()=>{try{return localStorage.getItem('sao-locale-asked')==='1'}catch(_){return true}};
+
+/* Event rows, shared by the calendar page and the Upcoming widget */
+function evRow(e,grouped){
+  const f=e.kind==='fatiha',i=EVREG.push(e)-1,hij=CAL.mode==='hijri';
+  const a=hij?hT(e.t):gT(e.t),b=hij?gT(e.t):hT(e.t);
+  const other=e.only&&e.cal!==CAL.mode?'<span class="tag">'+(e.cal==='hijri'?'Hijri date':'Gregorian date')+'</span>':'';
+  const turn=!f&&e.years>0?'Turns '+e.years:'';
+  return '<button class="evrow" type="button" data-ev="'+i+'"><span class="when">'+esc(a)+'<small>'+esc(b)+'</small></span><span class="ic">'+(f?CANDLE:CAKE)+'</span><span class="what">'+
+    (grouped?'<b>'+esc(e.line)+'</b>'+(turn?'<small>'+turn+'</small>':'')
+            :'<b>'+(f?'Request for Surah Al-Fatiha':esc(e.line))+'</b><small>'+(f?esc(e.line):'Birthday'+(turn?' \u00b7 '+turn.toLowerCase():''))+'</small>')+other+'</span></button>';
+}
+function upcomingHTML(){
+  const u=CAL.up.filter(inView),f=u.filter(e=>e.kind==='fatiha'),b=u.filter(e=>e.kind==='birthday');
+  if(!u.length)return '<div class="none">No family events in the next 30 days.</div>';
+  const grp=(t,a)=>a.length?'<h3 style="margin:12px 0 6px">'+t+'</h3>'+a.map(e=>evRow(e,true)).join(''):'';
+  return grp(CANDLE+' Fatiha Requests',f)+grp(CAKE+' Birthdays',b);
+}
+const loadUp=async()=>{CAL.up=await loadEvents(todayT(),todayT()+30*DAY)};
+async function refreshPill(){
+  const p=$('upill');
+  try{await loadUp();CALOK=true}catch(_){CALOK=false;p.hidden=true;return}
+  const u=CAL.up.filter(inView),f=u.filter(e=>e.kind==='fatiha').length,b=u.length-f;
+  p.textContent=u.length?'Upcoming'+(f?'  '+CANDLE+' '+f:'')+(b?'  '+CAKE+' '+b:''):'Family Calendar';
+  p.setAttribute('aria-label','Upcoming family events: '+f+' Fatiha requests, '+b+' birthdays in the next 30 days');
+  p.hidden=false;
+}
+function toggleUpop(show){
+  const o=$('upop');
+  if(show===undefined)show=o.hidden;
+  if(show){EVREG=[];o.innerHTML='<h2>Upcoming Family Events</h2><p class="help" style="margin:2px 0 0">The next 30 days</p>'+upcomingHTML()+'<div class="acts"><button class="btn pri" type="button" data-cact="open">Open Family Calendar</button></div>'}
+  else o.innerHTML='';
+  o.hidden=!show;
+}
+function showEvent(e){
+  const f=e.kind==='fatiha',rows=[],g=longG(e.g),h=longH(e.h),d=new Date(e.t),notes=[];
+  if(g)rows.push([f?'Death date':'Date of birth',g]);
+  if(h)rows.push(['Hijri date',h+(e.h.calc?' (worked out)':'')]);
+  if(e.years>0)rows.push([f?'Years since passing':'Turns',e.years+(e.cal==='hijri'?' (Hijri years)':'')]);
+  rows.push(['Falls on',WDL[d.getUTCDay()]+', '+gT(e.t,true)+(hT(e.t,true)?' \u00b7 '+hT(e.t,true):'')]);
+  rows.push(['Category',f?'Death Anniversary':'Birthday']);
+  if(e.only)notes.push(e.cal==='hijri'?'Only the Hijri date is recorded, so this event follows the Hijri calendar.':'Only the Gregorian date is recorded, so this event follows the Gregorian calendar.');
+  else notes.push(e.cal==='hijri'?'This is the Hijri anniversary. The Gregorian anniversary appears in the Gregorian calendar.':'This is the Gregorian anniversary. The Hijri anniversary appears in the Hijri calendar.');
+  if(e.h&&e.h.calc)notes.push('The Hijri date was worked out from the Gregorian date and can differ by a day from the moon sighting.');
+  $('evbox').innerHTML='<p class="kind">'+(f?CANDLE+' Request for Surah Al-Fatiha':CAKE+' Birthday')+'</p><h2>'+esc(e.line)+'</h2>'+
+    '<dl class="dates">'+rows.map(r=>'<dt>'+esc(r[0])+'</dt><dd>'+esc(String(r[1]))+'</dd>').join('')+'</dl>'+
+    notes.map(n=>'<p class="help">'+esc(n)+'</p>').join('')+
+    '<div class="acts"><button class="btn pri" type="button" data-evgo="'+e.person_id+'">Show in the tree</button><button class="btn txt" type="button" data-evclose="1">Close</button></div>';
+  $('evd').hidden=false;
+}
+function evClick(e){const b=e.target.closest('[data-ev]');if(b&&EVREG[b.dataset.ev]){showEvent(EVREG[b.dataset.ev]);return true}return false}
+
+/* The month on show */
+function monthSpan(){
+  if(CAL.mode==='gregorian')return {s:Date.UTC(CAL.y,CAL.m,1),n:new Date(Date.UTC(CAL.y,CAL.m+1,0)).getUTCDate(),title:GM[CAL.m]+' '+CAL.y};
+  const m=hMonth(CAL.hy,CAL.hm);return m?{s:m.t,n:m.days,title:HM[CAL.hm-1]+' '+CAL.hy+' AH'}:null;
+}
+function otherTitle(sp){      // the same days, named in the other calendar
+  const e=sp.s+(sp.n-1)*DAY;
+  if(CAL.mode==='gregorian'){const a=hOf(sp.s),b=hOf(e);if(!a||!b)return '';
+    return a.m===b.m?HM[a.m-1]+' '+a.y+' AH':HM[a.m-1]+(a.y!==b.y?' '+a.y:'')+' \u2013 '+HM[b.m-1]+' '+b.y+' AH'}
+  const a=new Date(sp.s),b=new Date(e),am=a.getUTCMonth(),bm=b.getUTCMonth(),ay=a.getUTCFullYear(),by=b.getUTCFullYear();
+  return am===bm?GM[am]+' '+ay:GM[am]+(ay!==by?' '+ay:'')+' \u2013 '+GM[bm]+' '+by;
+}
+function listSpan(sp){
+  const t=todayT();
+  if(CAL.range==='30')return [t,t+30*DAY];
+  if(CAL.range==='90')return [t,t+90*DAY];
+  if(CAL.range==='year'){
+    if(CAL.mode==='gregorian')return [Date.UTC(CAL.y,0,1),Date.UTC(CAL.y,11,31)];
+    const a=hMonth(CAL.hy,1),b=hMonth(CAL.hy,12);if(a&&b)return [a.t,b.t+(b.days-1)*DAY];
+  }
+  return [sp.s,sp.s+(sp.n-1)*DAY];
+}
+async function loadCal(){
+  try{
+    let sp=monthSpan();
+    if(!sp){await loadUp();const h=hOf(todayT());if(h){CAL.hy=h.y;CAL.hm=h.m}sp=monthSpan()}
+    if(!sp)throw new Error('That month is outside the range of the calendar.');
+    CAL.ev=await loadEvents(sp.s,sp.s+(sp.n-1)*DAY);
+    const ls=listSpan(sp);
+    CAL.list=CAL.range==='month'?CAL.ev:await loadEvents(ls[0],ls[1]);
+    CALOK=true;cmsg('');paintCal();
+  }catch(e){cmsg(calErr(e),true)}
+}
+function dayMap(){const m={};for(const e of CAL.ev)if(inView(e)&&typeOk(e))(m[e.t]=m[e.t]||[]).push(e);return m}
+function paintCal(){
+  const sp=monthSpan();if(!sp)return;
+  EVREG=[];
+  const hij=CAL.mode==='hijri',t0=todayT(),lead=new Date(sp.s).getUTCDay(),byDay=dayMap();
+  let g=WD.map(w=>'<div class="wd">'+w+'</div>').join('');
+  for(let i=0;i<lead;i++)g+='<div class="day blank"></div>';
+  for(let i=0;i<sp.n;i++){
+    const t=sp.s+i*DAY,ev=byDay[t]||[],f=ev.filter(e=>e.kind==='fatiha').length,b=ev.length-f;
+    let o='';
+    if(hij){const d=new Date(t);o=d.getUTCDate()+(i===0||d.getUTCDate()===1?' '+GM[d.getUTCMonth()].slice(0,3):'')}
+    else{const h=hOf(t);o=h?h.d+(i===0||h.d===1?' '+HMS[h.m-1]:''):''}
+    g+='<button type="button" class="day'+(ev.length?' has':'')+(t===t0?' now':'')+(t===CAL.pick?' pick':'')+'" data-cday="'+t+'" aria-label="'+esc((hij?hT(t,true):gT(t,true))+(ev.length?', '+ev.length+(ev.length===1?' event':' events'):''))+'"><b>'+(i+1)+'</b><small>'+esc(o)+'</small>'+
+      (ev.length?'<span class="mk">'+(f?CANDLE+(f>1?f:''):'')+(f&&b?' ':'')+(b?CAKE+(b>1?b:''):'')+'</span>':'')+'</button>';
+  }
+  let list=CAL.list.filter(e=>inView(e)&&typeOk(e)),lt;
+  if(CAL.range==='month'){
+    if(CAL.pick!=null){list=list.filter(e=>e.t===CAL.pick);lt='Events on '+(hij?hT(CAL.pick,true):gT(CAL.pick,true))}
+    else lt='Events in '+sp.title;
+  }else lt=CAL.range==='30'?'Next 30 days':CAL.range==='90'?'Next 90 days':'All of '+(hij?CAL.hy+' AH':CAL.y);
+  const seg=(v,l,on)=>'<button type="button" data-cm="'+v+'" class="'+(on?'on':'')+'" aria-pressed="'+on+'">'+l+'</button>';
+  $('calbody').innerHTML=
+    '<div class="calbar"><div class="seg" role="group" aria-label="Calendar">'+seg('gregorian','Gregorian',!hij)+seg('hijri','Hijri',hij)+'</div>'+
+    [['all','All events'],['birthday','Birthdays'],['fatiha','Death anniversaries']].map(x=>'<button type="button" class="chip'+(CAL.type===x[0]?' on':'')+'" data-ct="'+x[0]+'">'+x[1]+'</button>').join('')+
+    '<select class="field" id="crange" aria-label="Period">'+[['month','This month'],['30','Next 30 days'],['90','Next 90 days'],['year','Entire year']].map(x=>opt(x[0],CAL.range,x[1])).join('')+'</select></div>'+
+    '<div class="calcols"><div>'+
+      '<div class="panel"><div class="calnav"><button type="button" data-cnav="-1" aria-label="Previous month">\u2039</button><b>'+esc(sp.title)+'<small>'+esc(otherTitle(sp))+'</small></b><button type="button" class="now" data-cnav="0">Today</button><button type="button" data-cnav="1" aria-label="Next month">\u203a</button></div><div class="grid">'+g+'</div></div>'+
+      '<div class="panel"><h3>'+esc(String(lt))+'</h3>'+(list.length?list.map(e=>evRow(e)).join(''):'<div class="none">No events recorded for this period.</div>')+
+        (CAL.pick!=null?'<div class="chips" style="margin-top:8px"><button type="button" class="chip add" data-cact="unpick">Show the whole month</button></div>':'')+'</div>'+
+    '</div><div>'+
+      '<div class="panel"><h3>Upcoming Family Events</h3><p class="help">The next 30 days</p>'+upcomingHTML()+'</div>'+
+      '<div class="panel"><h3>Take the calendar with you</h3><p class="help">Download the family events for Apple Calendar, Google Calendar, Outlook or Samsung Calendar, or print the month on show.</p><div class="acts" style="margin-top:0"><button class="btn" type="button" data-cact="ics">Download for my calendar app</button><button class="btn" type="button" data-cact="print">Print or save this month as PDF</button></div></div>'+
+      '<div class="panel"><h3>Where you live</h3><p class="help">Used to match dates and reminders to your own day and time.</p>'+localeFields('s')+'<div class="acts" style="margin-top:10px"><button class="btn pri" type="button" data-cact="saveloc">Save</button></div></div>'+
+    '</div></div>';
+}
+function setMode(m){
+  if(m===CAL.mode)return;
+  const sp=monthSpan(),t=todayT();
+  const ref=CAL.pick!=null?CAL.pick:(sp&&t>=sp.s&&t<sp.s+sp.n*DAY?t:(sp?sp.s+14*DAY:t));
+  CAL.mode=m;try{localStorage.setItem('sao-cal',m)}catch(_){}
+  if(m==='hijri'){const h=hOf(ref);if(h){CAL.hy=h.y;CAL.hm=h.m}}
+  else{const d=new Date(ref);CAL.y=d.getUTCFullYear();CAL.m=d.getUTCMonth()}
+  CAL.pick=null;loadCal();
+}
+function navCal(d){
+  const t=todayT();
+  if(d===0){const n=new Date(t),h=hOf(t);CAL.y=n.getUTCFullYear();CAL.m=n.getUTCMonth();if(h){CAL.hy=h.y;CAL.hm=h.m}}
+  else if(CAL.mode==='gregorian'){const n=new Date(Date.UTC(CAL.y,CAL.m+d,1));CAL.y=n.getUTCFullYear();CAL.m=n.getUTCMonth()}
+  else{let hy=CAL.hy,hm=CAL.hm+d;if(hm<1){hm=12;hy--}if(hm>12){hm=1;hy++}
+    if(!hMonth(hy,hm)){cmsg('That month is outside the range of the calendar.',true);return}
+    CAL.hy=hy;CAL.hm=hm}
+  CAL.pick=null;loadCal();
+}
+async function openCal(){
+  $('menupop').hidden=true;toggleUpop(false);
+  const n=new Date(todayT());
+  CAL.y=n.getUTCFullYear();CAL.m=n.getUTCMonth();CAL.pick=null;CAL.range='month';CAL.type='all';
+  $('calbody').innerHTML='';$('cal').hidden=false;$('cal').scrollTop=0;cmsg('Opening the calendar\u2026');
+  try{await loadUp()}catch(e){cmsg(calErr(e),true);return}
+  const h=hOf(todayT());if(h){CAL.hy=h.y;CAL.hm=h.m}
+  await loadCal();
+}
+
+/* Calendar file (.ics) for Apple, Google, Outlook, Samsung and other calendar apps */
+const icsText=s=>String(s).replace(/\\/g,'\\\\').replace(/;/g,'\;').replace(/,/g,'\\,').replace(/\r?\n/g,'\\n');
+function icsFold(line){          // no line longer than 75 bytes
+  const enc=new TextEncoder();let out='',cur='',n=0;
+  for(const ch of line){const b=enc.encode(ch).length;if(n+b>73){out+=cur+'\r\n ';cur='';n=1}cur+=ch;n+=b}
+  return out+cur;
+}
+async function buildICS(){
+  const t=todayT(),ymd=x=>iso(x).replace(/-/g,'');
+  const g=await loadEvents(t,t+365*DAY,'gregorian'),h=await loadEvents(t,t+1825*DAY,'hijri');
+  const stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d+/,'');
+  const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Shajare Ahmed Online//Family Calendar//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:Shajare Ahmed Family Calendar'];
+  let n=0;
+  const add=(e,uid,rule,note)=>{
+    const f=e.kind==='fatiha',desc=[];
+    if(longG(e.g))desc.push((f?'Death date: ':'Date of birth: ')+longG(e.g));
+    if(longH(e.h))desc.push('Hijri date: '+longH(e.h));
+    if(note)desc.push(note);
+    L.push('BEGIN:VEVENT','UID:'+uid+'@shajareahmed.online','DTSTAMP:'+stamp,'DTSTART;VALUE=DATE:'+ymd(e.t),'DTEND;VALUE=DATE:'+ymd(e.t+DAY));
+    if(rule)L.push(rule);
+    L.push('SUMMARY:'+icsText((f?'Request for Surah Al-Fatiha: ':'Birthday: ')+e.line+(e.cal==='hijri'?' (Hijri date)':'')),'DESCRIPTION:'+icsText(desc.join('\n')),'CATEGORIES:'+(f?'Death Anniversary':'Birthday'),'TRANSP:TRANSPARENT','END:VEVENT');
+    n++;
+  };
+  const seen=new Set();
+  for(const e of g){const k=e.kind+'-g-'+e.person_id;if(seen.has(k))continue;seen.add(k);
+    add(e,k,e.g&&e.g.m===2&&e.g.d===29?'RRULE:FREQ=YEARLY;BYMONTH=2;BYMONTHDAY=-1':'RRULE:FREQ=YEARLY')}
+  for(const e of h)add(e,e.kind+'-h-'+e.person_id+'-'+ymd(e.t),null,'Hijri anniversary');
+  L.push('END:VCALENDAR');
+  return {text:L.map(icsFold).join('\r\n')+'\r\n',n};
+}
+async function exportICS(){
+  const r=await buildICS();
+  if(!r.n)throw new Error('There are no dated events to download yet.');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([r.text],{type:'text/calendar;charset=utf-8'}));a.download='family-calendar.ics';
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+}
+function printMonth(){
+  const sp=monthSpan();if(!sp)return;
+  const hij=CAL.mode==='hijri',lead=new Date(sp.s).getUTCDay(),byDay=dayMap(),cells=[];
+  for(let i=0;i<lead;i++)cells.push('<td></td>');
+  for(let i=0;i<sp.n;i++){const t=sp.s+i*DAY;
+    cells.push('<td><b>'+(i+1)+'</b><small>'+esc(hij?gT(t):hT(t))+'</small>'+(byDay[t]||[]).map(e=>'<div>'+(e.kind==='fatiha'?CANDLE+' Fatiha: ':CAKE+' ')+esc(e.line)+'</div>').join('')+'</td>')}
+  while(cells.length%7)cells.push('<td></td>');
+  let rows='';for(let i=0;i<cells.length;i+=7)rows+='<tr>'+cells.slice(i,i+7).join('')+'</tr>';
+  $('printout').innerHTML='<div class="phead"><img src="'+document.querySelector('.bar img').src+'" alt=""><div><b>Shajare Ahmed Online</b><span>Family Calendar</span></div><div class="pm">'+esc(sp.title)+'<small>'+esc(otherTitle(sp))+'</small></div></div>'+
+    '<table class="ptab"><tr>'+WDL.map(w=>'<th>'+w+'</th>').join('')+'</tr>'+rows+'</table>'+
+    '<p class="pfoot">'+CANDLE+' Request for Surah Al-Fatiha \u00b7 '+CAKE+' Birthday \u00b7 Drawn from the family tree on '+gT(todayT(),true)+'</p>';
+  window.print();
+}
+$('mcal').addEventListener('click',()=>openCal());
+$('calclose').addEventListener('click',()=>{$('cal').hidden=true;refreshPill()});
+$('cal').addEventListener('change',e=>{if(e.target.id==='crange'){CAL.range=e.target.value;CAL.pick=null;loadCal()}});
+$('cal').addEventListener('click',async e=>{
+  if(evClick(e))return;
+  let x;
+  if(x=e.target.closest('[data-cm]')){setMode(x.dataset.cm);return}
+  if(x=e.target.closest('[data-ct]')){CAL.type=x.dataset.ct;paintCal();return}
+  if(x=e.target.closest('[data-cday]')){const t=+x.dataset.cday;CAL.pick=CAL.pick===t?null:t;if(CAL.range!=='month'){CAL.range='month';CAL.list=CAL.ev}paintCal();return}
+  if(x=e.target.closest('[data-cnav]')){navCal(+x.dataset.cnav);return}
+  if(!(x=e.target.closest('[data-cact]')))return;
+  const a=x.dataset.cact;
+  if(a==='unpick'){CAL.pick=null;paintCal()}
+  else if(a==='print')printMonth();
+  else if(a==='ics'){x.disabled=true;
+    try{await exportICS();cmsg('Calendar file downloaded. Open it to add the events to your calendar app. Hijri anniversaries are included for the next five years.')}catch(err){cmsg(calErr(err),true)}
+    x.disabled=false;$('cal').scrollTop=0}
+  else if(a==='saveloc'){
+    try{await saveLocale('s');await loadUp();await loadCal();cmsg('Saved.')}catch(err){cmsg(calErr(err),true)}
+    $('cal').scrollTop=0}
+});
+$('evd').addEventListener('click',e=>{
+  const go=e.target.closest('[data-evgo]');
+  if(go){$('evd').hidden=true;$('cal').hidden=true;toggleUpop(false);if(P[go.dataset.evgo])focus(go.dataset.evgo,{expand:true});return}
+  if(e.target===$('evd')||e.target.closest('[data-evclose]'))$('evd').hidden=true;
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('evd').hidden)$('evd').hidden=true});
+$('upill').addEventListener('click',e=>{e.stopPropagation();toggleUpop()});
+$('upop').addEventListener('click',e=>{e.stopPropagation();if(evClick(e))return;if(e.target.closest('[data-cact="open"]'))openCal()});
+document.addEventListener('click',e=>{if(!e.target.closest('#evd'))toggleUpop(false)});
+
 /* ---------- Sign-in and start ---------- */
 let inviteTok=null,joinTok=null,inviteErr='';
 try{
@@ -1387,13 +1767,17 @@ async function enter(){
   if(home){let c=home;expanded.add(c);while(TP[c]){c=TP[c];expanded.add(c)}}
   const fam=ME?familyOf(ME):null;
   $('mmembers').hidden=!(ROLE==='admin'||ROLE==='moderator');linkUser=null;setContrib(false,true);
+  await loadSettings();
+  // asked once, on the first sign-in: country of residence, for local dates and reminders
+  if(SET&&!SET.country&&!localeAsked()&&Object.keys(P).length){flow={step:'locale'};try{localStorage.setItem('sao-locale-asked','1')}catch(_){}}
   layout();sel=desktop()?home:null;renderSheet();
   cur={};for(const id in tgt)cur[id]={x:tgt[id].x,y:tgt[id].y};
   gate.hidden=true;
   syncEls();if(home)view=(fam&&fitTo(fam))||viewFor(home,desktop()?0.95:0.85);draw();
   if(ME&&Object.keys(P).length===1){sel=ME;renderSheet();run(viewFor(ME));toast('Welcome. Choose Contribute to start adding your family.')}
+  refreshPill();
 }
-async function signOut(){if(sb)await sb.auth.signOut();for(const id in els){els[id].remove();delete els[id]}P={};tgt={};cur={};epath.setAttribute('d','');sel=null;flow=null;linkUser=null;myClaim=null;sheet.classList.remove('on');showGate('login','')}
+async function signOut(){if(sb)await sb.auth.signOut();for(const id in els){els[id].remove();delete els[id]}P={};tgt={};cur={};epath.setAttribute('d','');sel=null;flow=null;linkUser=null;myClaim=null;sheet.classList.remove('on');$('upill').hidden=true;$('upop').hidden=true;$('cal').hidden=true;$('evd').hidden=true;HMC=[];SET=null;CALOK=false;showGate('login','')}
 $('out').addEventListener('click',signOut);$('out2').addEventListener('click',signOut);
 function authMsg(error){
   const m=(error&&error.message)||'';
