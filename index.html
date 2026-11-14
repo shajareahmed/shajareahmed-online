@@ -92,6 +92,8 @@ main{flex:1;min-height:0;display:flex;position:relative}
 #world{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
 #edges{position:absolute;left:0;top:0;width:1px;height:1px;overflow:visible;pointer-events:none}
 #edges path{fill:none;stroke:var(--gold);stroke-width:1.6;stroke-linecap:round;opacity:.75}
+#edges #epath2{stroke:var(--gold-deep);stroke-dasharray:5 5}
+.node.inlaw{background:#FFF8E6;border-color:var(--gold)}
 
 .node{position:absolute;left:0;top:0;width:176px;height:60px;display:flex;align-items:center;gap:9px;padding:0 12px 0 7px;background:var(--paper);border:1.5px solid var(--line);border-radius:30px;box-shadow:0 2px 6px rgba(122,92,16,.10);cursor:pointer}
 .node.unv{border-style:dashed;border-color:var(--gold)}
@@ -111,6 +113,9 @@ main{flex:1;min-height:0;display:flex;position:relative}
 .tog.open{background:var(--gold);color:#fff}
 .tog::before{content:"";width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid currentColor}
 .tog.open::before{transform:rotate(180deg)}
+.tog.side{min-width:30px;padding:0 6px}
+.tog.side::before{display:none}
+.tog.side svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .blabel{display:none;position:absolute;left:50%;bottom:calc(100% + 10px);transform:translateX(-50%);white-space:nowrap;font-family:var(--display);font-weight:700;letter-spacing:.06em;color:var(--gold-deep);font-size:calc(13px*var(--inv,1));text-shadow:0 0 6px var(--ivory),0 0 6px var(--ivory)}
 #stage[data-z="far"] .blabel.on{display:block}
 #stage[data-z="far"] .sb,#stage[data-z="mid"] .sb{display:none}
@@ -339,7 +344,7 @@ html[dir="rtl"] .step{margin:4px 0 6px 40px}
       <div class="acts" style="justify-content:center"><button class="btn pri" id="pcheck" type="button">Check again</button><button class="btn" id="out2" type="button">Sign out</button></div>
     </div>
     <p class="msg info" id="gatemsg">Opening the family archive…</p>
-    <p class="ver">Ref P5FA</p>
+    <p class="ver">Ref K2ZJ</p>
   </div>
 </div>
 
@@ -357,7 +362,7 @@ html[dir="rtl"] .step{margin:4px 0 6px 40px}
 </header>
 <main>
   <div id="stage" data-z="near">
-    <div id="world"><svg id="edges"><path id="epath" d=""/></svg></div>
+    <div id="world"><svg id="edges"><path id="epath" d=""/><path id="epath2" d=""/></svg></div>
     <div class="search">
       <input id="q" type="search" placeholder="Search the family" autocomplete="off" aria-label="Search the family">
       <div class="results" id="results"></div>
@@ -451,7 +456,7 @@ const UR={
 'This tells the archive that this login belongs to this person.':'اس سے آرکائیو کو معلوم ہو جاتا ہے کہ یہ لاگ اِن اسی فرد کا ہے۔','Connect':'جوڑیں','Cancel':'منسوخ',
 'You have asked to be connected to this record.':'آپ نے اس ریکارڈ سے جوڑے جانے کی درخواست کی ہے۔','A moderator will confirm it shortly.':'ماڈریٹر جلد اس کی تصدیق کر دیں گے۔','Withdraw my request':'میری درخواست واپس لیں',
 '+ Father':'+ والد','+ Mother':'+ والدہ','+ Spouse':'+ شریکِ حیات','+ Child':'+ اولاد','+ Brother or sister':'+ بھائی یا بہن',
-'Edit details':'تفصیل میں ترمیم','This is me':'یہ میں ہوں','Mark as verified':'تصدیق شدہ قرار دیں','Open whole line':'پوری شاخ کھولیں',
+'Edit details':'تفصیل میں ترمیم','This is me':'یہ میں ہوں','Mark as verified':'تصدیق شدہ قرار دیں','Open whole line':'پوری شاخ کھولیں','Show this side of the family':'خاندان کی یہ طرف دکھائیں',
 'To add relatives or correct details, choose Contribute at the top.':'رشتہ دار شامل کرنے یا تفصیل درست کرنے کے لیے اوپر ”اضافہ و ترمیم“ منتخب کریں۔',
 'Select a person to add their relatives or correct their details':'کسی فرد کو منتخب کریں تاکہ اس کے رشتہ دار شامل کیے جا سکیں یا تفصیل درست کی جا سکے',
 /* admin */
@@ -911,7 +916,35 @@ function place(id,left,depth,parent){
   let cl=left+(Wd[id]-(ks.reduce((a,k)=>a+Wd[k],0)+GX*(ks.length-1)))/2;
   for(const k of ks){place(k,cl,depth+1,id);cl+=Wd[k]+GX}
 }
-function layout(){tgt={};tp={};Wd={};OXo={};if(ROOT){measure(ROOT);place(ROOT,0,0,null)}}
+// Someone who married into the line on show: their own parents are drawn above them, in the nearest free space of the row above.
+let XE=[];
+function placeInlaws(){
+  XE=[];
+  const rows={};
+  for(const id in tgt)(rows[tgt[id].d]=rows[tgt[id].d]||[]).push(tgt[id].x);
+  const free=(d,cx,w)=>{
+    const xs=rows[d]||[],ok=c=>xs.every(x=>Math.abs(x-c)>=(w+NW)/2+GX);
+    if(ok(cx))return cx;
+    for(let k=1;k<600;k++){const s=k*(NW+GX)/2;if(ok(cx+s))return cx+s;if(ok(cx-s))return cx-s}
+    return cx;
+  };
+  // only for couples whose own family is open, so a large tree is not crowded with every in-law
+  let todo=Object.keys(tgt).filter(id=>tgt[id].sp&&expanded.has(tgt[id].sp)).sort((a,b)=>tgt[a].d-tgt[b].d||tgt[a].x-tgt[b].x).map(id=>[id,0]);
+  while(todo.length){
+    const [s,gen]=todo.shift(),t=tgt[s];
+    const ps=P[s].par.slice().sort((a,b)=>(P[a].s==='m'?0:1)-(P[b].s==='m'?0:1));
+    if(!ps.length)continue;
+    const fresh=ps.filter(p=>!tgt[p]);
+    if(fresh.length){
+      const w=fresh.length*NW+(fresh.length-1)*SG,d=t.d-1,c=free(d,t.x,w),x0=c-(w-NW)/2;
+      fresh.forEach((p,i)=>{tgt[p]=i?{x:x0+i*(NW+SG),y:d*ROW,d,sp:fresh[0],il:true}:{x:x0,y:d*ROW,d,up:s,il:true};(rows[d]=rows[d]||[]).push(tgt[p].x)});
+      if(gen<5)todo.push([fresh[0],gen+1]);
+      if(fresh[1]&&gen<5)todo.push([fresh[1],gen+1]);
+    }
+    XE.push({ps,to:s});
+  }
+}
+function layout(){tgt={};tp={};Wd={};OXo={};XE=[];if(ROOT){measure(ROOT);place(ROOT,0,0,null);placeInlaws()}}
 
 /* ---------- Rendering ---------- */
 const $=id=>document.getElementById(id);
@@ -920,14 +953,15 @@ const els={};
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const desktop=()=>matchMedia('(min-width:900px)').matches;
 function nodeHTML(id){
-  const p=P[id],isSp=!!tgt[id].sp,n=isSp?0:tkids(id).length,c=completeness(id);
+  const p=P[id],isSp=!!(tgt[id].sp||tgt[id].il),n=isSp?0:tkids(id).length,c=completeness(id);
   const tsp=isSp?[]:spouses(id).filter(inTree);
   const sub=esc(years(p))+(tsp.length?' · & '+esc(first(tsp[0])):'');
   return (isSp?'':'<span class="blabel'+(tgt[id].d<=1?' on':'')+'">'+esc(first(id))+'’s line · '+(descCount(id)+1)+'</span>')+
     '<span class="av" style="--p:'+c.pct+'"><b>'+esc(initials(p))+'</b></span>'+
     '<span class="tx'+(p.nick&&p.known?' hasnk':'')+'"><span class="nm">'+esc(p.name)+'</span>'+(p.nick&&p.known?'<span class="nk">'+esc(p.known)+'</span>':'')+'<span class="sb">'+sub+'</span></span>'+
     (p.v?'<i class="gem" title="Verified"></i>':'')+(id===ME?'<span class="you">You</span>':'')+
-    (n?'<button class="tog'+(expanded.has(id)?' open':'')+'" data-tog="1" aria-label="'+(expanded.has(id)?'Collapse':'Expand')+' children">'+n+'</button>':'');
+    (n?'<button class="tog'+(expanded.has(id)?' open':'')+'" data-tog="1" aria-label="'+(expanded.has(id)?'Collapse':'Expand')+' children">'+n+'</button>':'')+
+    (isSp&&!inTree(id)&&(p.par.length||siblings(id).length)?'<button class="tog side" data-side="1" aria-label="Show this side of the family" title="Show this side of the family"><svg viewBox="0 0 24 24"><path d="M4 8h15M15 4l4 4-4 4M20 16H5M9 12l-4 4 4 4"/></svg></button>':'');
 }
 function syncEls(){
   for(const id in els)if(!tgt[id]){els[id].remove();delete els[id]}
@@ -935,7 +969,7 @@ function syncEls(){
   for(const id in tgt){
     let el=els[id];
     if(!el){el=els[id]=document.createElement('div');el.dataset.id=id;el.tabIndex=0;el.setAttribute('role','button');world.appendChild(el)}
-    el.className='node'+(P[id].v?'':' unv')+(tgt[id].sp?' sp':'')+(id===ME?' me':'')+(id===shown?' sel':'');
+    el.className='node'+(P[id].v?'':' unv')+(tgt[id].sp?' sp':'')+(tgt[id].il?' inlaw':'')+(id===ME?' me':'')+(id===shown?' sel':'');
     el.innerHTML=nodeHTML(id);
   }
 }
@@ -950,6 +984,14 @@ function draw(){
       d+='M'+ax+','+(o?a.y+NH/2:yb)+(o?'V'+yb:'')+'C'+ax+','+my+' '+c.x+','+my+' '+c.x+','+y2}
   }
   epath.setAttribute('d',d);
+  let d2='';
+  for(const e of XE){
+    const c=cur[e.to],a=cur[e.ps[0]],b=e.ps[1]&&cur[e.ps[1]];if(!c||!a)continue;
+    const link=(ax,ay0,ay)=>{const my=(ay+c.y)/2;d2+='M'+ax+','+ay0+(ay0!==ay?'V'+ay:'')+'C'+ax+','+my+' '+c.x+','+my+' '+c.x+','+c.y};
+    if(b&&a.y===b.y&&Math.abs(Math.abs(a.x-b.x)-(NW+SG))<1)link((a.x+b.x)/2,a.y+NH/2,a.y+NH);   // a couple: from between them
+    else{link(a.x,a.y+NH,a.y+NH);if(b)link(b.x,b.y+NH,b.y+NH)}
+  }
+  $('epath2').setAttribute('d',d2);
   applyView();
 }
 function applyView(){
@@ -961,7 +1003,7 @@ function run(viewTo,dur){
   if(anim)anim.finish();
   dur=reduce?0:(dur==null?380:dur);
   const from={};
-  for(const id in tgt){const o=tp[id]||tgt[id].sp;from[id]=cur[id]?cur[id]:(o&&cur[o]?cur[o]:tgt[id])}
+  for(const id in tgt){const o=tp[id]||tgt[id].sp||tgt[id].up;from[id]=cur[id]?cur[id]:(o&&cur[o]?cur[o]:tgt[id])}
   const vf={...view},vt=viewTo||vf,t0=performance.now();
   syncEls();
   const set=e=>{cur={};for(const id in tgt){const b=tgt[id],a=from[id]||b;cur[id]={x:a.x+(b.x-a.x)*e,y:a.y+(b.y-a.y)*e}}view={x:vf.x+(vt.x-vf.x)*e,y:vf.y+(vt.y-vf.y)*e,k:vf.k+(vt.k-vf.k)*e};draw()};
@@ -980,9 +1022,9 @@ function reveal(id){let c=TP[id];while(c){expanded.add(c);c=TP[c]}}
 function focus(id,opts){
   opts=opts||{};
   if(!P[id])return;
-  if(!host(id)){rootAnchor=id;buildTree();cur={};toast('Showing '+first(id)+'’s side of the family. Use the Home button to return.')}
+  if(opts.side?!inTree(id):(!host(id)&&!tgt[id])){rootAnchor=id;buildTree();cur={};toast('Showing '+first(id)+'’s side of the family. Use the Home button to return.')}
   const h=host(id);
-  reveal(h);if(opts.expand)expanded.add(h);
+  if(h){reveal(h);if(opts.expand)expanded.add(h)}
   sel=id;if(!opts.keepFlow)flow=null;
   layout();renderSheet();
   run(viewFor(tgt[id]?id:h,opts.k));
@@ -1001,9 +1043,9 @@ function familyOf(id){
 }
 function fitAll(){
   layout();
-  let x0=1e9,x1=-1e9,y1=0;for(const id in tgt){x0=Math.min(x0,tgt[id].x-NW/2);x1=Math.max(x1,tgt[id].x+NW/2);y1=Math.max(y1,tgt[id].y+NH)}
-  const f=frame(),k=Math.max(0.18,Math.min(1,(f.w-32)/(x1-x0),(f.h-110)/y1));
-  run({k,x:(f.w-(x0+x1)*k)/2,y:70});
+  let x0=1e9,x1=-1e9,y0=0,y1=0;for(const id in tgt){x0=Math.min(x0,tgt[id].x-NW/2);x1=Math.max(x1,tgt[id].x+NW/2);y0=Math.min(y0,tgt[id].y);y1=Math.max(y1,tgt[id].y+NH)}
+  const f=frame(),k=Math.max(0.18,Math.min(1,(f.w-32)/(x1-x0),(f.h-110)/(y1-y0)));
+  run({k,x:(f.w-(x0+x1)*k)/2,y:70-y0*k});
 }
 function zoomAt(cx,cy,fac){const k=Math.max(0.18,Math.min(2.2,view.k*fac));view={k,x:cx-(cx-view.x)*(k/view.k),y:cy-(cy-view.y)*(k/view.k)};applyView()}
 function toast(msg,err){const t=$('toast');t.textContent=msg;t.className='toast on'+(err?' err':'');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('on'),err?6500:3200)}
@@ -1049,6 +1091,7 @@ function tap(target){
   if(!n)return;
   const id=n.dataset.id;
   if(target.closest('[data-tog]')){toggle(id);return}
+  if(target.closest('[data-side]')){focus(id,{side:true,expand:true});return}
   focus(id,{expand:true});
 }
 function toggle(id){
@@ -1103,7 +1146,8 @@ function renderSheet(){
     '<div class="acts">'+(contrib?'<button class="btn" data-act="edit">Edit details</button>'+
       (!ME&&!myClaim?'<button class="btn" data-act="claim">This is me</button>':'')+
       (mod&&!p.v?'<button class="btn" data-act="verify">Mark as verified</button>':''):'')+
-      (inTree(sel)&&tkids(sel).length?'<button class="btn" data-act="line">Open whole line</button>':'')+'</div>'+
+      (inTree(sel)&&tkids(sel).length?'<button class="btn" data-act="line">Open whole line</button>':'')+
+      (!inTree(sel)&&(P[sel].par.length||siblings(sel).length)?'<button class="btn" data-act="side">Show this side of the family</button>':'')+'</div>'+
     (contrib?'':'<p class="help">To add relatives or correct details, choose Contribute at the top.</p>');
   body.scrollTop=0;
   sheet.classList.add('on');
@@ -1599,6 +1643,7 @@ body.addEventListener('click',async e=>{
   else if(a==='photo-soon'){toast('Photos: this feature is coming soon')}
   else if(a==='verify'){const id=sel;if(await busy(()=>rpc('update_person',{p_id:id,p_changes:{status:'verified'}}).then(()=>true))){await busy(refresh);layout();run();renderSheet();toast(first(id)+' is now verified')}}
   else if(a==='line'){(function open(id){expanded.add(id);tkids(id).forEach(open)})(sel);layout();run(viewFor(sel,Math.min(view.k,0.6)));toast('Opened every generation below '+first(sel))}
+  else if(a==='side'){focus(sel,{side:true,expand:true})}
   else if(a==='cancel'){flow=null;renderSheet()}
   else if(a==='link-yes'){const lu=linkUser,pid=sel;if(await busy(()=>rpc('link_member',{p_user:lu.id,p_person:pid}).then(()=>true))){linkUser=null;renderSheet();toast(lu.label+' is now connected to '+P[pid].name)}}
   else if(a==='link-no'){linkUser=null;renderSheet()}
