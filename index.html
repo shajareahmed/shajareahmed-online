@@ -81,7 +81,7 @@ button:disabled{opacity:.55;cursor:default}
 .row .acts{margin-top:8px;gap:6px}
 .row .btn{min-height:38px;padding:0 12px;font-size:13px}
 @media (max-width:480px){.brand small{display:none}.brand b{font-size:15px;letter-spacing:.04em;white-space:normal;line-height:1.1}.cbtn{padding:7px 11px}}
-#admin,#feedback{position:absolute;inset:0;z-index:12;background:var(--ivory);overflow-y:auto;-webkit-overflow-scrolling:touch}
+#admin,#feedback,#hiddenp{position:absolute;inset:0;z-index:12;background:var(--ivory);overflow-y:auto;-webkit-overflow-scrolling:touch}
 .adm{max-width:760px;margin:0 auto;padding:16px 16px 48px}
 .admhead{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .admhead h2{font-size:22px}
@@ -139,6 +139,10 @@ main{flex:1;min-height:0;display:flex;position:relative}
 .tog.collapse::before{display:none}
 .restorerow{position:absolute;left:50%;top:calc(100% + 28px);transform:translateX(-50%);display:flex;flex-wrap:wrap;gap:4px;width:max-content;max-width:180px;justify-content:center;z-index:2}
 .restorepill{border:1px solid var(--gold);background:var(--paper);color:var(--gold-deep);border-radius:999px;padding:3px 9px;font-size:11px;font-weight:700;white-space:nowrap}
+.hprow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.hprow .hpname{flex:1;font-weight:600}
+.hprow .btn{flex:none}
+#hplist .none{color:var(--muted);font-style:italic;padding:10px 0}
 /* Floating search and controls */
 .search{position:absolute;left:12px;top:12px;width:min(340px,calc(100% - 80px));z-index:5}
 .search input{width:100%;height:44px;border-radius:22px;border:1.5px solid var(--gold);background:var(--paper);padding:0 16px;box-shadow:0 3px 10px rgba(122,92,16,.15)}
@@ -388,7 +392,7 @@ html[dir="rtl"] .step{margin:4px 0 6px 40px}
       <div class="acts" style="justify-content:center"><button class="btn pri" id="pcheck" type="button">Check again</button><button class="btn" id="out2" type="button">Sign out</button></div>
     </div>
     <p class="msg info" id="gatemsg">Opening the family archive…</p>
-    <p class="ver">Ref Q9LZ</p>
+    <p class="ver">Ref X6RT</p>
   </div>
 </div>
 
@@ -410,6 +414,7 @@ html[dir="rtl"] .step{margin:4px 0 6px 40px}
       <button type="button" id="saveViewBtn">Save current view…</button>
       <div id="viewSlots"></div>
     </div>
+    <button id="mhidden" type="button">Hidden People</button>
     <button id="mcal" type="button">Family Calendar</button>
     <button id="mfeedback" type="button">Send feedback</button>
     <button id="mmembers" type="button" hidden>Admin</button>
@@ -463,6 +468,19 @@ html[dir="rtl"] .step{margin:4px 0 6px 40px}
       <div class="admhead"><h2>Family Calendar</h2><button class="btn" id="calclose" type="button">Back to the tree</button></div>
       <p class="msg info" id="calmsg" role="status"></p>
       <div id="calbody"></div>
+    </div>
+  </section>
+  <section id="hiddenp" hidden>
+    <div class="adm" style="max-width:560px">
+      <div class="admhead"><h2>Hidden People</h2><button class="btn" id="hpclose" type="button">Back to the tree</button></div>
+      <p class="msg info">People you hide here are removed from your view of the tree everywhere — not just this session — until you unhide them here. This is different from collapsing a branch on the canvas, which is temporary and resets unless you save it as a Custom View. You can hide anyone in the tree this way, even someone you're not closely related to.</p>
+      <div class="stack">
+        <div class="lab">Hide someone</div>
+        <input class="field" id="hpsearch" type="text" placeholder="Search by name" autocomplete="off">
+        <div class="results" id="hpresults"></div>
+      </div>
+      <h3>Currently hidden (<span id="hpcount">0</span>)</h3>
+      <div id="hplist"></div>
     </div>
   </section>
   <section id="feedback" hidden>
@@ -938,10 +956,10 @@ function buildTree(){
   TP={};
   for(const id of TREE){if(id===ROOT)continue;const f=father(id);TP[id]=f&&TREE.has(f)?f:P[id].par.find(x=>TREE.has(x))}
 }
-const tkids=id=>kids(id).filter(k=>TP[k]===id&&!hidden.has(k));
+const tkids=id=>kids(id).filter(k=>TP[k]===id&&!isHidden(k));
 const otherParent=(k,p)=>P[k].par.find(x=>x!==p);
 const uKey=(p,s)=>p+'~u~'+s;             // identifies one specific marriage/union for expand state
-const soloKidsOf=id=>{const S=spouses(id).filter(s=>!inTree(s));return tkids(id).filter(k=>{const op=otherParent(k,id);if(!op||!S.includes(op))return true;return hidden.has(op)&&forceKids.has(uKey(id,op))})};   // no usable second-parent card, or that parent is hidden but their kids were asked to stay visible
+const soloKidsOf=id=>{const S=spouses(id).filter(s=>!inTree(s));return tkids(id).filter(k=>{const op=otherParent(k,id);if(!op||!S.includes(op))return true;return isHidden(op)&&forceKids.has(uKey(id,op))})};   // no usable second-parent card, or that parent is hidden but their kids were asked to stay visible
 const unionKidsOf=(id,s)=>tkids(id).filter(k=>otherParent(k,id)===s);
 const inTree=id=>TREE.has(id);
 const host=id=>!id||!P[id]?null:(inTree(id)?id:(spouses(id).find(inTree)||null));
@@ -994,7 +1012,9 @@ const nameKey=n=>{const t=n.trim().toLowerCase().split(/\s+/).filter(w=>!/^(syed
 /* ---------- Layout ---------- */
 const NW=176,NH=60,GX=18,ROW=124;
 const expanded=new Set();
-let hidden=new Set(),forceKids=new Set();   // personal view: people hidden from the canvas, and unions whose kids are forced visible anyway
+let hidden=new Set(),forceKids=new Set();   // personal view: people collapsed from the canvas this session (or via a saved Custom View), and unions whose kids are forced visible anyway
+let permHidden=new Set();                   // people permanently hidden from this member's view (persisted; see Hidden People)
+const isHidden=id=>hidden.has(id)||permHidden.has(id);
 let tgt={},tp={},Wd={},cur={},view={x:0,y:0,k:1},anim=null,sel=null,flow=null;
 const SG=10;let OXo={},COX={};
 const sps=id=>spouses(id).filter(s=>!inTree(s));   // spouses drawn beside their partner
@@ -1017,7 +1037,7 @@ function openAll(id){   // deep: open every marriage below id, all the way down
 function measure(id){
   const S=sps(id);
   if(S.length<=1){
-    const s0=S[0],hiddenS=!!(s0&&hidden.has(s0));
+    const s0=S[0],hiddenS=!!(s0&&isHidden(s0));
     const ks=expanded.has(id)?(hiddenS?soloKidsOf(id):tkids(id)):[];
     let w=hiddenS?NW:unitW(id);      // her card no longer takes space once hidden
     if(ks.length)w=Math.max(w,ks.map(measure).reduce((a,b)=>a+b,0)+GX*(ks.length-1));
@@ -1029,7 +1049,7 @@ function measure(id){
   Wd['~solo~'+id]=idW;
   let total=idW;
   for(const s of S){
-    if(hidden.has(s))continue;      // her card and this union's own slice are gone; any forced-visible kids were already counted as solo above
+    if(isHidden(s))continue;      // her card and this union's own slice are gone; any forced-visible kids were already counted as solo above
     const uk=expanded.has(uKey(id,s))?unionKidsOf(id,s):[];
     let sw=NW;
     if(uk.length)sw=Math.max(NW,uk.map(measure).reduce((a,b)=>a+b,0)+GX*(uk.length-1));
@@ -1041,7 +1061,7 @@ function measure(id){
 function place(id,left,depth,parent){
   const S=sps(id);
   if(S.length<=1){
-    const s0=S[0],hiddenS=!!(s0&&hidden.has(s0));
+    const s0=S[0],hiddenS=!!(s0&&isHidden(s0));
     const sp=hiddenS?[]:S,x=left+(Wd[id]-(hiddenS?NW:unitW(id)))/2+NW/2,y=depth*ROW;
     tgt[id]={x,y,d:depth};tp[id]=parent;
     sp.forEach((s,i)=>{if(!tgt[s])tgt[s]={x:x+(i+1)*(NW+SG),y,d:depth,sp:id}});
@@ -1063,7 +1083,7 @@ function place(id,left,depth,parent){
   }
   let cursor=left+idW;
   for(const s of S){
-    if(hidden.has(s))continue;      // her forced-visible kids, if any, were already placed above as solo
+    if(isHidden(s))continue;      // her forced-visible kids, if any, were already placed above as solo
     const sw=Wd['~u~'+id+'~'+s];
     cursor+=SG;
     const sx=cursor+sw/2;
@@ -1131,8 +1151,8 @@ function nodeHTML(id){
   const canCollapse=!t.il&&(t.sp||TP[id]!=null);
   let restorerow='';
   if(!isSp&&!t.il){
-    const hs=sps(id).filter(s=>hidden.has(s));
-    const hc=kids(id).filter(k=>TP[k]===id&&hidden.has(k));
+    const hs=sps(id).filter(s=>hidden.has(s)&&!permHidden.has(s));
+    const hc=kids(id).filter(k=>TP[k]===id&&hidden.has(k)&&!permHidden.has(k));
     const pills=hs.concat(hc).map(x=>'<button class="restorepill" data-restore="'+esc(x)+'" aria-label="Show '+esc(first(x))+'">+ '+esc(first(x))+'</button>').join('');
     if(pills)restorerow='<div class="restorerow">'+pills+'</div>';
   }
@@ -1373,7 +1393,7 @@ function renderSheet(){
 }
 
 /* ---------- View only by default; Contribute switches editing on ---------- */
-let contrib=false,linkUser=null,myClaim=null,VIEWS=[];
+let contrib=false,linkUser=null,myClaim=null,VIEWS=[],HIDDENP=[];
 const skipClaim=()=>{try{return localStorage.getItem('sao-claim-later')==='1'}catch(_){return false}};
 function setContrib(on,quiet){
   contrib=on;const b=$('contrib');b.classList.toggle('on',on);b.textContent=on?'Contributing':'Contribute';b.setAttribute('aria-pressed',on?'true':'false');
@@ -1481,6 +1501,51 @@ $('fbsend').addEventListener('click',async()=>{
   catch(e){$('fbmsg').textContent=String(e.message||e).replace(/^ERROR:\s*/,'');$('fbmsg').className='msg';}
   finally{$('fbsend').disabled=false}
 });
+
+/* ---------- Hidden People (permanent, until unhidden) ---------- */
+function renderHiddenList(){
+  $('hpcount').textContent=HIDDENP.length;
+  $('hplist').innerHTML=HIDDENP.length
+    ? HIDDENP.map(h=>'<div class="hprow"><span class="hpname">'+esc(h.name)+'</span><button class="btn" data-unhide="'+h.id+'" type="button">Unhide</button></div>').join('')
+    : '<p class="none">You haven\'t hidden anyone.</p>';
+}
+async function openHiddenPeople(){
+  try{HIDDENP=await rpc('list_hidden_people')||[]}catch(e){toast(String(e.message||e),true);return}
+  permHidden=new Set(HIDDENP.map(h=>h.id));
+  $('hpsearch').value='';$('hpresults').innerHTML='';$('hpresults').classList.remove('on');
+  renderHiddenList();
+  $('hiddenp').hidden=false;
+}
+function closeHiddenPeople(){$('hiddenp').hidden=true;layout();run()}
+$('mhidden').addEventListener('click',()=>{$('menupop').hidden=true;openHiddenPeople()});
+$('hpclose').addEventListener('click',closeHiddenPeople);
+$('hpsearch').addEventListener('input',()=>{
+  const q=$('hpsearch').value;
+  const list=matchesFor(q,'u',[]).filter(p=>!permHidden.has(p.id));
+  const r=$('hpresults');
+  r.innerHTML=list.length?list.map(p=>'<button type="button" data-hpick="'+p.id+'">'+esc(p.name)+'<small>'+esc(idLabel(p.id))+'</small></button>').join(''):(q.trim().length>1?'<p>No one matches.</p>':'');
+  r.classList.toggle('on',q.trim().length>1);
+});
+$('hpresults').addEventListener('click',async e=>{
+  const b=e.target.closest('[data-hpick]');if(!b)return;
+  const pid=b.dataset.hpick;
+  try{await rpc('hide_person',{p_person_id:pid})}catch(e2){toast(String(e2.message||e2).replace(/^ERROR:\s*/,''),true);return}
+  try{HIDDENP=await rpc('list_hidden_people')||[]}catch(_){}
+  permHidden=new Set(HIDDENP.map(h=>h.id));
+  $('hpsearch').value='';$('hpresults').innerHTML='';$('hpresults').classList.remove('on');
+  renderHiddenList();
+  toast('Hidden from your view of the tree.');
+});
+$('hplist').addEventListener('click',async e=>{
+  const b=e.target.closest('[data-unhide]');if(!b)return;
+  const pid=b.dataset.unhide;
+  try{await rpc('unhide_person',{p_person_id:pid})}catch(e2){toast(String(e2.message||e2).replace(/^ERROR:\s*/,''),true);return}
+  try{HIDDENP=await rpc('list_hidden_people')||[]}catch(_){}
+  permHidden=new Set(HIDDENP.map(h=>h.id));
+  renderHiddenList();
+  toast('Unhidden.');
+});
+
 $('admclose').addEventListener('click',closeAdmin);
 const inviteUrl=t=>location.origin+location.pathname+'?invite='+t;
 const groupUrl=t=>location.origin+location.pathname+'?join='+t;
@@ -2569,6 +2634,8 @@ async function enter(){
   myClaim=null;
   if(!ME){try{const c=await rpc('my_claim');if(c&&c.status==='pending'&&P[c.person_id])myClaim=c}catch(_){}}
   VIEWS=[];try{VIEWS=await rpc('list_tree_views')||[]}catch(_){}
+  HIDDENP=[];try{HIDDENP=await rpc('list_hidden_people')||[]}catch(_){}
+  permHidden=new Set(HIDDENP.map(h=>h.id));
   const defV=VIEWS.find(v=>v.is_default);
   hidden=new Set((defV&&defV.config&&defV.config.hidden)||[]);
   forceKids=new Set((defV&&defV.config&&defV.config.forceKids)||[]);
