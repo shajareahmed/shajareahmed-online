@@ -135,10 +135,14 @@ main{flex:1;min-height:0;display:flex;position:relative}
 .tog.side svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 #stage[data-z="far"] .sb,#stage[data-z="mid"] .sb{display:none}
 #stage[data-z="far"] .tog,#stage[data-z="far"] .gem,#stage[data-z="far"] .you,#stage[data-z="far"] .restorerow{display:none}
-.tog.collapse{position:absolute;right:-10px;top:-10px;bottom:auto;left:auto;transform:none;min-width:22px;height:20px;padding:0 5px 0 7px}
-.tog.collapse::before{transform:rotate(45deg)}
-.restorerow{position:absolute;left:50%;top:calc(100% + 28px);transform:translateX(-50%);display:flex;flex-wrap:wrap;gap:4px;width:max-content;max-width:180px;justify-content:center;z-index:2}
-.restorepill{border:1px solid var(--gold);background:var(--paper);color:var(--gold-deep);border-radius:999px;padding:3px 9px;font-size:11px;font-weight:700;white-space:nowrap}
+.tog.collapse{min-width:22px;height:22px;padding:0;border-radius:50%}
+.tog.collapse.side{left:-11px;right:auto;bottom:auto;top:50%;transform:translateY(-50%)}
+.tog.collapse.side::before{transform:rotate(-90deg)}
+.tog.collapse.offset{left:calc(50% - 34px)}
+.restorerow{position:absolute;left:50%;top:calc(100% + 26px);transform:translateX(-50%);display:flex;flex-wrap:wrap;gap:8px;width:max-content;justify-content:center;z-index:2}
+.restorerow .tog{position:static;left:auto;right:auto;top:auto;bottom:auto;transform:none}
+.tog.collapse.ghost::before{transform:rotate(90deg)}
+body.arrows-off .tog.collapse,body.arrows-off .restorerow{display:none!important}
 .hprow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
 .hprow .hpname{flex:1;font-weight:600}
 .hprow .btn{flex:none}
@@ -392,7 +396,7 @@ html[dir="rtl"] .step{margin:4px 0 6px 40px}
       <div class="acts" style="justify-content:center"><button class="btn pri" id="pcheck" type="button">Check again</button><button class="btn" id="out2" type="button">Sign out</button></div>
     </div>
     <p class="msg info" id="gatemsg">Opening the family archive…</p>
-    <p class="ver">Ref P3WY</p>
+    <p class="ver">Ref V4RM</p>
   </div>
 </div>
 
@@ -405,6 +409,7 @@ html[dir="rtl"] .step{margin:4px 0 6px 40px}
     <button type="button" data-view="focus">Focus View</button>
   </div>
   <button class="cbtn" id="contrib" type="button" aria-pressed="false">Contribute</button>
+  <button class="out" id="arrows" type="button" aria-pressed="true" aria-label="Hide collapse arrows" title="Hide collapse arrows"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></button>
   <button class="out" id="menu" type="button" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
   <div class="menu" id="menupop" hidden>
     <button class="mview" type="button" data-view="tree">Family Tree</button>
@@ -1153,8 +1158,10 @@ function nodeHTML(id){
   if(!isSp&&!t.il){
     const hs=sps(id).filter(s=>hidden.has(s)&&!permHidden.has(s));
     const hc=kids(id).filter(k=>TP[k]===id&&hidden.has(k)&&!permHidden.has(k));
-    const pills=hs.concat(hc).map(x=>'<button class="restorepill" data-restore="'+esc(x)+'" aria-label="Show '+esc(first(x))+'">+ '+esc(first(x))+'</button>').join('');
-    if(pills)restorerow='<div class="restorerow">'+pills+'</div>';
+    const ghosts=hs.map(x=>'<button class="tog collapse ghost" data-restore="'+esc(x)+'" aria-label="Show '+esc(first(x))+'" title="Show '+esc(first(x))+'"></button>')
+      .concat(hc.map(x=>'<button class="tog collapse ghost down" data-restore="'+esc(x)+'" aria-label="Show '+esc(first(x))+'" title="Show '+esc(first(x))+'"></button>'))
+      .join('');
+    if(ghosts)restorerow='<div class="restorerow">'+ghosts+'</div>';
   }
   return '<span class="av" style="--p:'+c.pct+'"><b>'+esc(initials(p))+'</b></span>'+
     '<span class="tx'+(p.nick&&p.known?' hasnk':'')+'"><span class="nm">'+esc(p.name)+'</span>'+(p.nick&&p.known?'<span class="nk">'+esc(p.known)+'</span>':'')+'<span class="sb">'+sub+'</span></span>'+
@@ -1162,7 +1169,9 @@ function nodeHTML(id){
     (n?'<button class="tog'+(togOn?' open':'')+'" data-tog="'+esc(togKey)+'" aria-label="'+(togOn?'Collapse':'Expand')+' children">'+n+'</button>':'')+
     (UPC.has(id)?'<button class="tog up'+(hideUp.has(id)?'':' open')+'" data-up="1" aria-label="'+(hideUp.has(id)?'Show their parents':'Hide their parents')+'"></button>':'')+
     (isSp&&!inTree(id)&&(p.par.length||siblings(id).length)?'<button class="tog side" data-side="1" aria-label="Show this side of the family" title="Show this side of the family"><svg viewBox="0 0 24 24"><path d="M4 8h15M15 4l4 4-4 4M20 16H5M9 12l-4 4 4 4"/></svg></button>':'')+
-    (canCollapse?'<button class="tog collapse" data-collapse="'+esc(id)+'" aria-label="Collapse '+esc(first(id))+'" title="Collapse"></button>':'')+
+    (canCollapse?(t.sp
+      ?'<button class="tog collapse side" data-collapse="'+esc(id)+'" aria-label="Collapse '+esc(first(id))+'" title="Collapse"></button>'
+      :'<button class="tog collapse open'+(n?' offset':'')+'" data-collapse="'+esc(id)+'" aria-label="Collapse '+esc(first(id))+'" title="Collapse"></button>'):'')+
     restorerow;
 }
 function syncEls(){
@@ -1405,6 +1414,19 @@ function setContrib(on,quiet){
   if(on&&!sel&&Object.keys(P).length)toast('Select a person to add their relatives or correct their details');
 }
 $('contrib').addEventListener('click',()=>setContrib(!contrib));
+let arrowsHidden=(()=>{try{return localStorage.getItem('sao-arrows')==='0'}catch(_){return false}})();
+function applyArrowsHidden(){
+  document.body.classList.toggle('arrows-off',arrowsHidden);
+  const b=$('arrows');
+  b.setAttribute('aria-pressed',arrowsHidden?'false':'true');
+  b.setAttribute('aria-label',arrowsHidden?'Show collapse arrows':'Hide collapse arrows');
+  b.title=arrowsHidden?'Show collapse arrows':'Hide collapse arrows';
+  b.innerHTML=arrowsHidden
+    ?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/><line x1="3" y1="21" x2="21" y2="3"/></svg>'
+    :'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>';
+}
+applyArrowsHidden();
+$('arrows').addEventListener('click',()=>{arrowsHidden=!arrowsHidden;try{localStorage.setItem('sao-arrows',arrowsHidden?'0':'1')}catch(_){}applyArrowsHidden()});
 $('menu').addEventListener('click',e=>{e.stopPropagation();$('menupop').hidden=!$('menupop').hidden;$('viewpop').hidden=true});
 $('menupop').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(!b)return;$('menupop').hidden=true;setView(b.dataset.view)});
 $('mviews').addEventListener('click',e=>{
