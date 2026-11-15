@@ -1154,8 +1154,13 @@ function placeInlaws(){
   const free=(d,cx,w)=>{
     const xs=rows[d]||[],ok=c=>xs.every(x=>Math.abs(x-c)>=(w+NW)/2+GX);
     if(ok(cx))return cx;
-    for(let k=1;k<600;k++){const s=k*(NW+GX)/2;if(ok(cx+s))return cx+s;if(ok(cx-s))return cx-s}
-    return cx;
+    for(let k=1;k<12;k++){const s=k*(NW+GX)/2;if(ok(cx+s))return cx+s;if(ok(cx-s))return cx-s}
+    // No nearby gap within a sensible radius: grow the row at its edge instead of
+    // flinging this person far from where they logically belong (was: searched up to
+    // 600 steps out, which could land someone thousands of px away with a long crossing line).
+    if(!xs.length)return cx;
+    const maxX=Math.max(...xs),minX=Math.min(...xs);
+    return cx>=(maxX+minX)/2 ? maxX+(w+NW)/2+GX : minX-(w+NW)/2-GX;
   };
   // only for couples whose own family is open, so a large tree is not crowded with every in-law
   let todo=Object.keys(tgt).filter(id=>tgt[id].sp&&unionOpen(tgt[id].sp,id)).sort((a,b)=>tgt[a].d-tgt[b].d||tgt[a].x-tgt[b].x).map(id=>[id,0]);
@@ -1188,7 +1193,7 @@ const $=id=>document.getElementById(id);
 const stage=$('stage'),world=$('world'),epath=$('epath'),sheet=$('sheet'),body=$('body');
 const els={};
 /* Build version: update BUILD_VER and BUILD_DATE (YYYY-MM-DD) with every build you ship. */
-const BUILD_VER='T3HN',BUILD_DATE='2026-11-15';
+const BUILD_VER='R8VN',BUILD_DATE='2026-11-16';
 const buildDateLong=()=>{const d=new Date(BUILD_DATE+'T00:00:00');return isNaN(d)?BUILD_DATE:d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})};
 $('verLogin').textContent='Ver '+BUILD_VER;
 $('verwm').textContent='v'+BUILD_VER;
