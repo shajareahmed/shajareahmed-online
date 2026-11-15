@@ -63,6 +63,17 @@ button:disabled{opacity:.55;cursor:default}
 @media (max-width:899px){#viewsw{display:none}.mview{display:block}}
 .menu{position:absolute;inset-inline-end:10px;top:calc(100% + 4px);z-index:30;background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 22px rgba(122,92,16,.2);display:flex;flex-direction:column;min-width:220px;overflow:hidden}
 .menu button{text-align:start;padding:12px 16px;border:0;border-bottom:1px solid var(--ivory);background:none;min-height:46px;font-weight:600}
+#viewsPanel{display:flex;flex-direction:column;background:var(--ivory)}
+#viewsPanel #saveViewBtn{border-bottom:1px solid var(--line);color:var(--gold-deep)}
+.vslot{display:flex;align-items:center;gap:6px;padding:10px 16px 10px 28px;border-bottom:1px solid var(--line);font-size:13px}
+.vslot .vname{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:start;background:none;border:0;font-weight:600;padding:0}
+.vslot .vdef{font-size:11px;color:var(--gold-deep);flex:none}
+.vslot .vdel{flex:none;border:1px solid var(--line);background:none;border-radius:999px;padding:4px 10px;font-size:11px;color:var(--muted)}
+.vslot.empty{color:var(--muted);font-style:italic}
+#saveViewForm{position:fixed;inset:0;z-index:60;background:rgba(40,30,10,.35);display:flex;align-items:center;justify-content:center;padding:20px}
+.svwrap{background:var(--paper);border-radius:16px;padding:20px;max-width:340px;width:100%;box-shadow:0 12px 32px rgba(0,0,0,.25)}
+.svwrap input[type="text"]{width:100%;margin:10px 0;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:14px}
+.svdef{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-bottom:10px}
 .node.sp{background:#FBF5E2}
 .row{border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:8px;background:var(--ivory)}
 .row b{display:block;overflow-wrap:anywhere}
@@ -180,6 +191,9 @@ h2{font-family:var(--display);font-weight:700;font-size:19px;letter-spacing:.04e
 h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px;font-weight:700}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{border:1px solid var(--line);background:var(--ivory);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:600;min-height:36px}
+.chiprow{display:inline-flex;align-items:center;gap:4px;flex-wrap:wrap}
+.chiphide{border:1px solid var(--line);background:none;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:600;color:var(--muted);min-height:30px}
+.chipfk{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--muted)}
 .chip.add{border-style:dashed;border-color:var(--gold);background:none;color:var(--gold-deep)}
 .chip.on{background:var(--gold);border-color:var(--gold-deep);color:#fff}
 .none{color:var(--muted);font-size:13px}
@@ -370,7 +384,7 @@ html[dir="rtl"] .step{margin:4px 0 6px 40px}
       <div class="acts" style="justify-content:center"><button class="btn pri" id="pcheck" type="button">Check again</button><button class="btn" id="out2" type="button">Sign out</button></div>
     </div>
     <p class="msg info" id="gatemsg">Opening the family archive…</p>
-    <p class="ver">Ref T2VN</p>
+    <p class="ver">Ref H4PV</p>
   </div>
 </div>
 
@@ -380,20 +394,32 @@ html[dir="rtl"] .step{margin:4px 0 6px 40px}
   <button class="cbtn" id="viewsw" type="button" aria-haspopup="true" aria-expanded="false">Family Tree</button>
   <div class="menu" id="viewpop" hidden>
     <button type="button" data-view="tree">Family Tree</button>
-    <button type="button" data-view="focus">My Focus</button>
-    <button type="button" data-view="list">List</button>
+    <button type="button" data-view="focus">Focus View</button>
   </div>
   <button class="cbtn" id="contrib" type="button" aria-pressed="false">Contribute</button>
   <button class="out" id="menu" type="button" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
   <div class="menu" id="menupop" hidden>
     <button class="mview" type="button" data-view="tree">Family Tree</button>
-    <button class="mview" type="button" data-view="focus">My Focus</button>
-    <button class="mview" type="button" data-view="list">List</button>
+    <button class="mview" type="button" data-view="focus">Focus View</button>
+    <button type="button" id="mviews" aria-expanded="false">Custom Views</button>
+    <div id="viewsPanel" hidden>
+      <button type="button" id="saveViewBtn">Save current view…</button>
+      <div id="viewSlots"></div>
+    </div>
     <button id="mcal" type="button">Family Calendar</button>
     <button id="mfeedback" type="button">Send feedback</button>
     <button id="mmembers" type="button" hidden>Admin</button>
     <button id="mlang" type="button" data-keep></button>
     <button id="out" type="button">Sign out</button>
+  </div>
+  <div id="saveViewForm" hidden>
+    <div class="svwrap">
+      <h3>Save current view</h3>
+      <input id="svlabel" type="text" maxlength="40" placeholder="Name this view">
+      <label class="svdef"><input type="checkbox" id="svdefault"> Set as my default</label>
+      <p class="msg err" id="svmsg" role="status"></p>
+      <div class="acts"><button class="btn pri" id="svsave" type="button">Save</button><button class="btn txt" id="svcancel" type="button">Cancel</button></div>
+    </div>
   </div>
 </header>
 <main>
@@ -908,10 +934,10 @@ function buildTree(){
   TP={};
   for(const id of TREE){if(id===ROOT)continue;const f=father(id);TP[id]=f&&TREE.has(f)?f:P[id].par.find(x=>TREE.has(x))}
 }
-const tkids=id=>kids(id).filter(k=>TP[k]===id);
+const tkids=id=>kids(id).filter(k=>TP[k]===id&&!hidden.has(k));
 const otherParent=(k,p)=>P[k].par.find(x=>x!==p);
 const uKey=(p,s)=>p+'~u~'+s;             // identifies one specific marriage/union for expand state
-const soloKidsOf=id=>{const S=spouses(id).filter(s=>!inTree(s));return tkids(id).filter(k=>{const op=otherParent(k,id);return !op||!S.includes(op)})};   // no usable second-parent card
+const soloKidsOf=id=>{const S=spouses(id).filter(s=>!inTree(s));return tkids(id).filter(k=>{const op=otherParent(k,id);if(!op||!S.includes(op))return true;return hidden.has(op)&&forceKids.has(uKey(id,op))})};   // no usable second-parent card, or that parent is hidden but their kids were asked to stay visible
 const unionKidsOf=(id,s)=>tkids(id).filter(k=>otherParent(k,id)===s);
 const inTree=id=>TREE.has(id);
 const host=id=>!id||!P[id]?null:(inTree(id)?id:(spouses(id).find(inTree)||null));
@@ -964,6 +990,7 @@ const nameKey=n=>{const t=n.trim().toLowerCase().split(/\s+/).filter(w=>!/^(syed
 /* ---------- Layout ---------- */
 const NW=176,NH=60,GX=18,ROW=124;
 const expanded=new Set();
+let hidden=new Set(),forceKids=new Set();   // personal view: people hidden from the canvas, and unions whose kids are forced visible anyway
 let tgt={},tp={},Wd={},cur={},view={x:0,y:0,k:1},anim=null,sel=null,flow=null;
 const SG=10;let OXo={},COX={};
 const sps=id=>spouses(id).filter(s=>!inTree(s));   // spouses drawn beside their partner
@@ -986,8 +1013,9 @@ function openAll(id){   // deep: open every marriage below id, all the way down
 function measure(id){
   const S=sps(id);
   if(S.length<=1){
-    const ks=expanded.has(id)?tkids(id):[];
-    let w=unitW(id);
+    const s0=S[0],hiddenS=!!(s0&&hidden.has(s0));
+    const ks=expanded.has(id)?(hiddenS?soloKidsOf(id):tkids(id)):[];
+    let w=hiddenS?NW:unitW(id);      // her card no longer takes space once hidden
     if(ks.length)w=Math.max(w,ks.map(measure).reduce((a,b)=>a+b,0)+GX*(ks.length-1));
     return Wd[id]=w;
   }
@@ -997,6 +1025,7 @@ function measure(id){
   Wd['~solo~'+id]=idW;
   let total=idW;
   for(const s of S){
+    if(hidden.has(s))continue;      // her card and this union's own slice are gone; any forced-visible kids were already counted as solo above
     const uk=expanded.has(uKey(id,s))?unionKidsOf(id,s):[];
     let sw=NW;
     if(uk.length)sw=Math.max(NW,uk.map(measure).reduce((a,b)=>a+b,0)+GX*(uk.length-1));
@@ -1008,14 +1037,15 @@ function measure(id){
 function place(id,left,depth,parent){
   const S=sps(id);
   if(S.length<=1){
-    const sp=S,x=left+(Wd[id]-unitW(id))/2+NW/2,y=depth*ROW;
+    const s0=S[0],hiddenS=!!(s0&&hidden.has(s0));
+    const sp=hiddenS?[]:S,x=left+(Wd[id]-(hiddenS?NW:unitW(id)))/2+NW/2,y=depth*ROW;
     tgt[id]={x,y,d:depth};tp[id]=parent;
     sp.forEach((s,i)=>{if(!tgt[s])tgt[s]={x:x+(i+1)*(NW+SG),y,d:depth,sp:id}});
     OXo[id]=sp.length===1?(NW+SG)/2:0;      // children hang from the middle of a couple
     if(!expanded.has(id))return;
-    const ks=tkids(id);if(!ks.length)return;
+    const ks=hiddenS?soloKidsOf(id):tkids(id);if(!ks.length)return;
     let cl=left+(Wd[id]-(ks.reduce((a,k)=>a+Wd[k],0)+GX*(ks.length-1)))/2;
-    for(const k of ks){COX[k]=OXo[id];place(k,cl,depth+1,id);cl+=Wd[k]+GX}
+    for(const k of ks){COX[k]=hiddenS?0:OXo[id];place(k,cl,depth+1,id);cl+=Wd[k]+GX}
     return;
   }
   const idW=Wd['~solo~'+id],y=depth*ROW,x=left+idW/2;
@@ -1029,6 +1059,7 @@ function place(id,left,depth,parent){
   }
   let cursor=left+idW;
   for(const s of S){
+    if(hidden.has(s))continue;      // her forced-visible kids, if any, were already placed above as solo
     const sw=Wd['~u~'+id+'~'+s];
     cursor+=SG;
     const sx=cursor+sw/2;
@@ -1264,6 +1295,11 @@ async function busy(fn){
 /* ---------- Sheet: person details ---------- */
 const chip=id=>'<button class="chip" data-go="'+id+'">'+esc(P[id].name)+'</button>';
 const who=id=>id===ME?'your':esc(first(id))+'’s';
+const spouseChip=(father,s)=>{const h=hidden.has(s),fk=forceKids.has(uKey(father,s));
+  return '<span class="chiprow">'+chip(s)+'<button class="chiphide" data-hidesp="'+s+'">'+(h?'Show on tree':'Hide from tree')+'</button>'+
+    (h?'<label class="chipfk"><input type="checkbox" data-fksp="'+s+'"'+(fk?' checked':'')+'> show their kids anyway</label>':'')+'</span>'};
+const sibChip=id=>{const h=hidden.has(id);
+  return '<span class="chiprow">'+chip(id)+'<button class="chiphide" data-hidesib="'+id+'">'+(h?'Show on tree':'Hide branch')+'</button></span>'};
 function renderSheet(){
   refreshIdBanner();
   if(!flow&&!Object.keys(P).length){openForm({mode:'add',rel:'first'});return}
@@ -1286,8 +1322,8 @@ function renderSheet(){
     (inTree(sel)&&descCount(sel)?'<p class="help" style="margin-top:-6px">'+descCount(sel)+(descCount(sel)===1?' descendant':' descendants')+(descDepth(sel)>1?' across '+descDepth(sel)+' generations':'')+' in the archive</p>':'')+
     datesHTML(sel)+detailsHTML(sel)+
     '<h3>Parents</h3>'+(p.par.length?'<div class="chips">'+p.par.map(chip).join('')+'</div>':'<div class="none">Not recorded yet</div>')+
-    '<h3>'+(sp.length>1?'Spouses':'Spouse')+'</h3>'+(sp.length?'<div class="chips">'+sp.map(chip).join('')+'</div>':'<div class="none">Not recorded yet</div>')+
-    (sib.length?'<h3>Brothers and sisters</h3><div class="chips">'+sib.map(chip).join('')+'</div>':'')+
+    '<h3>'+(sp.length>1?'Spouses':'Spouse')+'</h3>'+(sp.length?'<div class="chips">'+sp.map(s=>spouseChip(sel,s)).join('')+'</div>':'<div class="none">Not recorded yet</div>')+
+    (sib.length?'<h3>Brothers and sisters</h3><div class="chips">'+sib.map(sibChip).join('')+'</div>':'')+
     '<h3>Children</h3>'+(ks.length?'<div class="chips">'+ks.map(chip).join('')+'</div>':'<div class="none">None recorded yet</div>')+
     (linkUser?'<div class="match" style="margin-top:14px"><b>Connect '+esc(linkUser.label)+' to '+esc(p.name)+'?</b><p class="help" style="margin:4px 0 0">This tells the archive that this login belongs to this person.</p><div class="acts" style="margin-top:8px"><button class="btn pri" data-act="link-yes">Connect</button><button class="btn txt" data-act="link-no">Cancel</button></div></div>':'')+
     (myClaim&&myClaim.person_id===sel?'<div class="match" style="margin-top:14px"><b>You have asked to be connected to this record.</b><p class="help" style="margin:4px 0 0">A moderator will confirm it shortly.</p><div class="acts" style="margin-top:8px"><button class="btn txt" data-act="claim-cancel">Withdraw my request</button></div></div>':'')+
@@ -1304,7 +1340,7 @@ function renderSheet(){
 }
 
 /* ---------- View only by default; Contribute switches editing on ---------- */
-let contrib=false,linkUser=null,myClaim=null;
+let contrib=false,linkUser=null,myClaim=null,VIEWS=[];
 const skipClaim=()=>{try{return localStorage.getItem('sao-claim-later')==='1'}catch(_){return false}};
 function setContrib(on,quiet){
   contrib=on;const b=$('contrib');b.classList.toggle('on',on);b.textContent=on?'Contributing':'Contribute';b.setAttribute('aria-pressed',on?'true':'false');
@@ -1318,6 +1354,64 @@ function setContrib(on,quiet){
 $('contrib').addEventListener('click',()=>setContrib(!contrib));
 $('menu').addEventListener('click',e=>{e.stopPropagation();$('menupop').hidden=!$('menupop').hidden;$('viewpop').hidden=true});
 $('menupop').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(!b)return;$('menupop').hidden=true;setView(b.dataset.view)});
+$('mviews').addEventListener('click',e=>{
+  e.stopPropagation();
+  const willOpen=$('viewsPanel').hidden;
+  $('viewsPanel').hidden=!willOpen;
+  $('mviews').setAttribute('aria-expanded',String(willOpen));
+  if(willOpen)renderViewSlots();
+});
+function renderViewSlots(){
+  const bySlot={};VIEWS.forEach(v=>bySlot[v.slot]=v);
+  let h='';
+  for(let s=1;s<=5;s++){
+    const v=bySlot[s];
+    h+=v?('<div class="vslot"><button type="button" class="vname" data-applyv="'+v.id+'">'+esc(v.label)+'</button>'+
+          (v.is_default?'<span class="vdef">Default</span>':'')+
+          '<button type="button" class="vdel" data-delv="'+v.id+'">Delete</button></div>')
+       :'<div class="vslot empty">Empty slot</div>';
+  }
+  $('viewSlots').innerHTML=h;
+}
+$('viewSlots').addEventListener('click',async e=>{
+  const ap=e.target.closest('[data-applyv]');
+  if(ap){
+    const v=VIEWS.find(x=>x.id===ap.dataset.applyv);if(!v)return;
+    hidden=new Set((v.config&&v.config.hidden)||[]);
+    forceKids=new Set((v.config&&v.config.forceKids)||[]);
+    setView((v.config&&v.config.mode)||'tree');
+    layout();run();
+    $('menupop').hidden=true;$('viewpop').hidden=true;
+    toast('Showing "'+v.label+'".');
+    return;
+  }
+  const del=e.target.closest('[data-delv]');
+  if(del){
+    e.stopPropagation();
+    try{await rpc('delete_tree_view',{p_id:del.dataset.delv})}catch(e2){toast(String(e2.message||e2).replace(/^ERROR:\s*/,''));return}
+    try{VIEWS=await rpc('list_tree_views')||[]}catch(_){}
+    renderViewSlots();toast('View deleted.');
+  }
+});
+$('saveViewBtn').addEventListener('click',e=>{
+  e.stopPropagation();
+  $('menupop').hidden=true;
+  $('svlabel').value='';$('svdefault').checked=false;$('svmsg').textContent='';
+  $('saveViewForm').hidden=false;$('svlabel').focus();
+});
+$('svcancel').addEventListener('click',()=>{$('saveViewForm').hidden=true});
+$('svsave').addEventListener('click',async()=>{
+  const label=$('svlabel').value.trim();
+  if(!label){$('svmsg').textContent='Give this view a name first.';return}
+  if(VIEWS.length>=5&&!VIEWS.some(v=>v.label===label)){$('svmsg').textContent='You already have 5 saved views — delete one first.';return}
+  const cfg={mode:VIEWMODE,hidden:[...hidden],forceKids:[...forceKids]};
+  try{
+    await rpc('save_tree_view',{p_label:label,p_config:cfg,p_default:$('svdefault').checked});
+  }catch(e){$('svmsg').textContent=String(e.message||e).replace(/^ERROR:\s*/,'');return}
+  try{VIEWS=await rpc('list_tree_views')||[]}catch(_){}
+  $('saveViewForm').hidden=true;
+  toast('View saved.');
+});
 document.addEventListener('click',()=>{$('menupop').hidden=true;$('viewpop').hidden=true});
 for(const id of ['lang1','mlang']){const b=$(id);b.textContent=LANG==='ur'?'English':'اردو';b.lang=LANG==='ur'?'en':'ur';b.addEventListener('click',()=>setLang(LANG==='ur'?'en':'ur'))}
 /* ---------- Admin page (moderators and admin) ---------- */
@@ -1773,6 +1867,8 @@ function afterBorn(){
 }
 body.addEventListener('click',async e=>{
   const go=e.target.closest('[data-go]');if(go){focus(go.dataset.go,{expand:true});return}
+  const hsp=e.target.closest('[data-hidesp]');if(hsp){const s=hsp.dataset.hidesp;hidden.has(s)?hidden.delete(s):hidden.add(s);layout();run();renderSheet();return}
+  const hsib=e.target.closest('[data-hidesib]');if(hsib){const s=hsib.dataset.hidesib;hidden.has(s)?hidden.delete(s):hidden.add(s);layout();run();renderSheet();return}
   const ad=e.target.closest('[data-add]');if(ad){startFlow(ad.dataset.add,sel);return}
   const nx=e.target.closest('[data-next]');if(nx){startFlow(nx.dataset.next,nx.dataset.of);return}
   const fs=e.target.closest('[data-fseg]');
@@ -1945,6 +2041,12 @@ function dateFieldChanged(e){
 }
 body.addEventListener('input',dateFieldChanged);
 body.addEventListener('change',dateFieldChanged);
+body.addEventListener('change',e=>{
+  const fk=e.target.closest('[data-fksp]');if(!fk)return;
+  const key=uKey(sel,fk.dataset.fksp);
+  e.target.checked?forceKids.add(key):forceKids.delete(key);
+  layout();run();
+});
 body.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.classList.contains('field')){e.preventDefault();const b=body.querySelector('.btn.pri');if(b)b.click()}});
 function closeSheet(){flow=null;sel=null;renderSheet();syncEls();setSheetFull(false)}
 $('close').addEventListener('click',closeSheet);
@@ -2016,8 +2118,12 @@ $('panelToggle').addEventListener('click',()=>setPanelCollapsed(!panelCollapsed)
 /* ---------- View switcher: Family Tree / My Focus / List ---------- */
 let VIEWMODE='tree',focusTarget=null;
 function setView(mode){
+  if(mode==='focus'&&!ME){
+    toast('Find yourself in the tree and choose "This is me" first — showing Family Tree for now.');
+    mode='tree';
+  }
   VIEWMODE=mode;
-  $('viewsw').textContent=mode==='list'?'List':mode==='focus'?'My Focus':'Family Tree';
+  $('viewsw').textContent=mode==='list'?'List':mode==='focus'?'Focus View':'Family Tree';
   if(mode==='list'){
     stage.hidden=true;$('listpane').hidden=false;renderList($('lq').value);
   }else{
@@ -2429,6 +2535,11 @@ async function enter(){
   try{await refresh()}catch(e){showGate('login',String(e.message||e),true);return}
   myClaim=null;
   if(!ME){try{const c=await rpc('my_claim');if(c&&c.status==='pending'&&P[c.person_id])myClaim=c}catch(_){}}
+  VIEWS=[];try{VIEWS=await rpc('list_tree_views')||[]}catch(_){}
+  const defV=VIEWS.find(v=>v.is_default);
+  hidden=new Set((defV&&defV.config&&defV.config.hidden)||[]);
+  forceKids=new Set((defV&&defV.config&&defV.config.forceKids)||[]);
+  const landMode=defV?((defV.config&&defV.config.mode)||'tree'):(ME?'focus':'tree');
   expanded.clear();
   const home=ME||ROOT;
   if(home){reveal(home);expandAllUnions(home)}
@@ -2442,6 +2553,7 @@ async function enter(){
   gate.hidden=true;
   syncEls();if(home)view=(fam&&fitTo(fam))||viewFor(home,desktop()?0.95:0.85);draw();
   if(ME&&Object.keys(P).length===1){sel=ME;renderSheet();run(viewFor(ME));toast('Welcome. Choose Contribute to start adding your family.')}
+  else if(landMode==='focus'&&home)setView('focus');
   refreshPill();
 }
 async function signOut(){if(sb)await sb.auth.signOut();for(const id in els){els[id].remove();delete els[id]}P={};tgt={};cur={};epath.setAttribute('d','');sel=null;flow=null;linkUser=null;myClaim=null;sheet.classList.remove('on');setSheetFull(false);sheet.style.transform='';$('upill').hidden=true;$('upop').hidden=true;$('cal').hidden=true;$('evd').hidden=true;HMC=[];SET=null;CALOK=false;idBannerDismissed=false;$('idbanner').classList.remove('on');setView('tree');showGate('login','')}
