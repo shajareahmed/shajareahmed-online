@@ -91,6 +91,17 @@ button:disabled{opacity:.55;cursor:default}
 .panel{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px 16px 16px;margin-top:14px}
 .panel h3{margin-top:0}
 .panel .help{margin:0 0 10px}
+.panelHead{display:flex;align-items:center;justify-content:space-between;width:100%;background:none;border:none;padding:0;margin:0;font:inherit;color:inherit;cursor:pointer;text-align:left}
+.panelHead h3{margin:0}
+.panelHead .chev{flex:0 0 auto;margin-left:10px;color:var(--gold-deep);border:1.5px solid var(--gold);border-radius:50%;width:22px;height:22px;position:relative}
+.panelHead .chev::before{content:'';position:absolute;left:50%;top:44%;width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translate(-50%,-50%) rotate(45deg);transition:transform .2s}
+.panelHead[aria-expanded="true"] .chev::before{transform:translate(-50%,-50%) rotate(-135deg)}
+#allMembersPanel{margin-top:12px}
+.stepper{display:flex;align-items:center;gap:10px;margin-top:8px}
+.stepper .btn{min-width:42px;min-height:38px;padding:0;font-size:18px;line-height:1}
+.stepval{min-width:120px;text-align:center;font-size:13.5px}
+.activitychain{margin:6px 0 0;padding-left:18px}
+.activitychain li{font-size:12.5px;color:var(--muted);margin-bottom:2px}
 .linkbox{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:10px}
 .linkbox .field{flex:1 1 220px;height:42px;font-size:13px}
 a.btn{display:inline-flex;align-items:center;text-decoration:none}
@@ -1177,7 +1188,7 @@ const $=id=>document.getElementById(id);
 const stage=$('stage'),world=$('world'),epath=$('epath'),sheet=$('sheet'),body=$('body');
 const els={};
 /* Build version: update BUILD_VER and BUILD_DATE (YYYY-MM-DD) with every build you ship. */
-const BUILD_VER='P7XK',BUILD_DATE='2026-11-15';
+const BUILD_VER='T3HN',BUILD_DATE='2026-11-15';
 const buildDateLong=()=>{const d=new Date(BUILD_DATE+'T00:00:00');return isNaN(d)?BUILD_DATE:d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})};
 $('verLogin').textContent='Ver '+BUILD_VER;
 $('verwm').textContent='v'+BUILD_VER;
@@ -1572,14 +1583,14 @@ $('svsave').addEventListener('click',async()=>{
 document.addEventListener('click',()=>{$('menupop').hidden=true;$('viewpop').hidden=true});
 for(const id of ['lang1','mlang']){const b=$(id);b.textContent=LANG==='ur'?'English':'اردو';b.lang=LANG==='ur'?'en':'ur';b.addEventListener('click',()=>setLang(LANG==='ur'?'en':'ur'))}
 /* ---------- Admin page (moderators and admin) ---------- */
-let adm=null;
+let adm=null,admMembersOpen=false,admMembersQuery='';
 function amsg(t,err){const m=$('admmsg');m.textContent=t||'';m.className='msg'+(err?'':' info');if(t)$('admin').scrollTop=0}
 async function act(fn){try{return await fn()}catch(e){amsg(String(e.message||e).replace(/^ERROR:\s*/,''),true);return undefined}}
 async function openAdmin(keep){
   let d;
   try{d=await Promise.all([rpc('list_access_requests'),rpc('list_members'),rpc('list_invitations'),rpc('list_claims').catch(()=>[]),rpc('list_group_invites').catch(()=>[]),rpc('list_hijri_offsets').catch(()=>[]),rpc('list_feedback').catch(()=>[]),rpc('list_change_log',{p_limit:100}).catch(()=>null)])}catch(e){toast(String(e.message||e),true);return}
   adm={reqs:d[0]||[],mems:d[1]||[],invs:d[2]||[],claims:d[3]||[],groups:d[4]||[],hoff:d[5]||[],fb:d[6]||[],activity:d[7],fresh:keep&&adm?adm.fresh:null,gfresh:keep&&adm?adm.gfresh:null};
-  if(!keep)amsg('');
+  if(!keep){amsg('');admMembersOpen=false;admMembersQuery=''}
   renderAdmin();$('admin').hidden=false;
 }
 function closeAdmin(){$('admin').hidden=true;adm=null}
@@ -1706,17 +1717,52 @@ function shareHTML(url){
 }
 const day=d=>{try{return new Date(d).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})}catch(_){return ''}};
 const dayTime=d=>{try{return new Date(d).toLocaleString(undefined,{day:'numeric',month:'short',year:'numeric',hour:'numeric',minute:'2-digit'})}catch(_){return ''}};
+// Today's Hijri date for a country with the given day offset applied.
+function hijriPreview(days){
+  const t=todayT()+(days||0)*DAY,dt=new Date(t);
+  const h=toHijri(dt.getUTCFullYear(),dt.getUTCMonth()+1,dt.getUTCDate());
+  return h?h.d+' '+HM[h.m-1]+' '+h.y+' AH':'';
+}
+function hoffLabel(d){return d===0?'No adjustment':(d>0?'+'+d+' day'+(d>1?'s':''):d+' day'+(d<-1?'s':''))}
+// One member row, with or without the moderator/admin action buttons.
+function memberRow(m,isAdm,withActions){
+  const role=m.role==='admin'?'Admin':m.role==='moderator'?'Moderator':'Member';let b='';
+  if(withActions){
+    if(m.person_id)b+='<button class="btn" data-go="'+m.person_id+'">Show in tree</button><button class="btn txt" data-unlink="'+m.user_id+'">Disconnect</button>';
+    else if(!m.is_me)b+='<button class="btn" data-link="'+m.user_id+'" data-label="'+esc(m.full_name)+'">Connect to a person</button>';
+    if(isAdm&&!m.is_me){
+      if(m.role==='member')b+='<button class="btn" data-role="moderator" data-user="'+m.user_id+'">Make moderator</button>';
+      if(m.role==='moderator')b+='<button class="btn" data-role="member" data-user="'+m.user_id+'">Return to member</button>';
+      b+='<button class="btn txt" data-active="'+(m.active?'0':'1')+'" data-user="'+m.user_id+'">'+(m.active?'Switch off access':'Switch access on')+'</button>';
+    }
+  }
+  return '<div class="row"><b>'+esc(m.full_name)+(m.is_me?' (you)':'')+'</b><small>'+esc(m.email||'')+'</small><small>'+role+(m.active?'':' · access switched off')+' · '+(m.person_name?'connected to '+esc(m.person_name):'not connected to a person in the tree')+'</small>'+(b?'<div class="acts">'+b+'</div>':'')+'</div>';
+}
+function recentMembersHTML(mems){
+  const recent=[...mems].sort((x,y)=>new Date(y.created_at)-new Date(x.created_at)).slice(0,5);
+  return recent.length?recent.map(m=>memberRow(m,false,false)).join(''):'<div class="none">No members yet.</div>';
+}
+function membersListHTML(mems,query){
+  const isAdm=ROLE==='admin',q=(query||'').trim().toLowerCase();
+  const list=q?mems.filter(m=>(m.full_name||'').toLowerCase().includes(q)||(m.email||'').toLowerCase().includes(q)):mems;
+  return list.length?list.map(m=>memberRow(m,isAdm,true)).join(''):'<div class="none">No one matches that search.</div>';
+}
+function renderMembersList(){const l=$('allMembersList');if(l)l.innerHTML=membersListHTML(adm.mems,admMembersQuery)}
+// Activity log: consecutive entries by the same person become one chain,
+// as long as no more than 30 minutes passes between them.
+function chainActivity(list){
+  const chains=[],gap=30*60*1000;
+  for(const e of list){
+    const last=chains[chains.length-1];
+    if(last&&last.actor===e.actor&&(new Date(last.items[last.items.length-1].changed_at)-new Date(e.changed_at))<=gap)last.items.push(e);
+    else chains.push({actor:e.actor,items:[e]});
+  }
+  return chains;
+}
 function renderAdmin(){
   const a=adm,isAdm=ROLE==='admin';
   $('admbody').innerHTML=
     '<div class="panel"><h3>App version</h3><p class="help">Current Ver. '+esc(BUILD_VER)+' — updated '+esc(buildDateLong())+'. <a href="changelog.html" target="_blank" rel="noopener">See what has changed, build by build</a>.</p></div>'+
-
-    '<div class="panel"><h3>Activity log'+(a.activity?' ('+a.activity.length+')':'')+'</h3>'+
-    (a.activity===null?'<p class="help">Not available yet — run migration 015 to turn this on.</p>'
-      :!a.activity.length?'<div class="none">Nothing recorded yet.</div>'
-      :'<p class="help">Person edits and membership changes, most recent first. Invitations and “this is me” requests aren’t tracked here yet — see their own sections below.</p>'+
-        a.activity.map(e=>'<div class="row"><b>'+esc(e.summary)+'</b><small>'+esc(e.actor)+' · '+esc(dayTime(e.changed_at))+'</small></div>').join(''))+
-    '</div>'+
 
     '<div class="panel"><h3>Waiting for approval ('+a.reqs.length+')</h3>'+
     (a.reqs.length?a.reqs.map(r=>'<div class="row"><b>'+esc(r.full_name)+'</b><small>'+esc(r.email||'')+' · asked on '+day(r.created_at)+'</small>'+(r.about?'<small>“'+esc(r.about)+'”</small>':'')+
@@ -1749,33 +1795,62 @@ function renderAdmin(){
     '<div class="lab">Password (at least 8 characters)</div><input class="field" id="dpass" type="text" autocomplete="off"></div>'+
     '<div class="acts" style="margin-top:10px"><button class="btn pri" data-act="mkuser">Create login</button></div></div>'+
 
-    '<div class="panel"><h3>Members ('+a.mems.length+')</h3>'+
-    a.mems.map(m=>{
-      const role=m.role==='admin'?'Admin':m.role==='moderator'?'Moderator':'Member';let b='';
-      if(m.person_id)b+='<button class="btn" data-go="'+m.person_id+'">Show in tree</button><button class="btn txt" data-unlink="'+m.user_id+'">Disconnect</button>';
-      else if(!m.is_me)b+='<button class="btn" data-link="'+m.user_id+'" data-label="'+esc(m.full_name)+'">Connect to a person</button>';
-      if(isAdm&&!m.is_me){
-        if(m.role==='member')b+='<button class="btn" data-role="moderator" data-user="'+m.user_id+'">Make moderator</button>';
-        if(m.role==='moderator')b+='<button class="btn" data-role="member" data-user="'+m.user_id+'">Return to member</button>';
-        b+='<button class="btn txt" data-active="'+(m.active?'0':'1')+'" data-user="'+m.user_id+'">'+(m.active?'Switch off access':'Switch access on')+'</button>';
-      }
-      return '<div class="row"><b>'+esc(m.full_name)+(m.is_me?' (you)':'')+'</b><small>'+esc(m.email||'')+'</small><small>'+role+(m.active?'':' · access switched off')+' · '+(m.person_name?'connected to '+esc(m.person_name):'not connected to a person in the tree')+'</small>'+(b?'<div class="acts">'+b+'</div>':'')+'</div>';
-    }).join('')+'</div>'+
+    '<div class="panel"><h3>Recent Members</h3><p class="help">The 5 most recent to join. Open "All Members" below to act on anyone.</p>'+
+    recentMembersHTML(a.mems)+'</div>'+
+
+    '<div class="panel">'+
+    '<button type="button" class="panelHead" id="allMembersToggle" aria-expanded="'+(admMembersOpen?'true':'false')+'" aria-controls="allMembersPanel"><h3>All Members ('+a.mems.length+')</h3><span class="chev" aria-hidden="true"></span></button>'+
+    '<div id="allMembersPanel"'+(admMembersOpen?'':' hidden')+'>'+
+    '<input class="field" id="membersearch" placeholder="Search by name or email" autocomplete="off" value="'+esc(admMembersQuery)+'" style="margin-bottom:10px">'+
+    '<div id="allMembersList">'+membersListHTML(a.mems,admMembersQuery)+'</div>'+
+    '</div></div>'+
 
     '<div class="panel"><h3>Feedback ('+a.fb.length+')</h3>'+
     (a.fb.length?a.fb.map(f=>'<div class="row"><b>'+esc(f.sender_name)+'</b><small>'+esc(f.email||'')+' · '+day(f.created_at)+(f.person_name?' · about '+esc(f.person_name):'')+'</small><small style="margin-top:4px">“'+esc(f.message)+'”</small>'+
       '<div class="acts">'+(f.person_id?'<button class="btn txt" data-go="'+f.person_id+'">Show in tree</button>':'')+'<button class="btn txt" data-fbdel="'+f.id+'">Clear</button></div></div>').join(''):'<div class="none">No feedback.</div>')+'</div>'+
 
     '<div class="panel"><h3>Hijri dates by country</h3><p class="help">The calendar follows the Umm al-Qura calendar. Where the moon sighting usually falls a day later or earlier, set that here for the country. It moves the Hijri dates and reminders for members living there. Each member can also set the first day of any month for themselves on the Family Calendar page.</p>'+
-    (a.hoff.length?a.hoff.map(o=>'<div class="row"><b>'+esc(cname(o.country))+'</b><small>'+o.members+(o.members===1?' member':' members')+'</small><select class="field" data-hoff="'+o.country+'" aria-label="Adjustment for '+esc(cname(o.country))+'" style="margin-top:8px;height:42px;font-size:14px">'+[[-1,'One day earlier'],[0,'No adjustment'],[1,'One day later']].map(v=>opt(v[0],o.days,v[1])).join('')+'</select></div>').join(''):'<div class="none">No member has chosen a country yet.</div>')+'</div>';
+    (a.hoff.length?a.hoff.map(o=>{
+      const d=o.days||0,changedBy=o.set_by_name?('Last changed by '+esc(o.set_by_name)+(o.set_at?' on '+day(o.set_at):'')):'';
+      return '<div class="row" data-hoffcountry="'+o.country+'" data-hoffdays="'+d+'">'+
+        '<b>'+esc(cname(o.country))+'</b><small>'+o.members+(o.members===1?' member':' members')+'</small>'+
+        '<div class="stepper"><button class="btn txt" type="button" data-hoffstep="down" aria-label="One day earlier"'+(d<=-2?' disabled':'')+'>−</button>'+
+        '<span class="stepval">'+esc(hoffLabel(d))+'</span>'+
+        '<button class="btn txt" type="button" data-hoffstep="up" aria-label="One day later"'+(d>=2?' disabled':'')+'>+</button></div>'+
+        '<small>Today there: '+esc(hijriPreview(d))+'</small>'+
+        (changedBy?'<small>'+changedBy+'</small>':'')+
+        '</div>';
+    }).join(''):'<div class="none">No member has chosen a country yet.</div>')+'</div>'+
+
+    '<div class="panel"><h3>Activity log'+(a.activity?' ('+a.activity.length+')':'')+'</h3>'+
+    (a.activity===null?'<p class="help">Not available yet — run migration 015 to turn this on.</p>'
+      :!a.activity.length?'<div class="none">Nothing recorded yet.</div>'
+      :'<p class="help">Person edits and membership changes, most recent first, grouped by who made them. Invitations and “this is me” requests aren’t tracked here yet — see their own sections above.</p>'+
+        chainActivity(a.activity).map(c=>'<div class="row"><b>'+esc(c.actor)+'</b><small>'+(c.items.length>1?esc(dayTime(c.items[c.items.length-1].changed_at))+' – '+esc(dayTime(c.items[0].changed_at)):esc(dayTime(c.items[0].changed_at)))+'</small>'+
+          '<ul class="activitychain">'+c.items.map(e=>'<li>'+esc(e.summary)+'</li>').join('')+'</ul></div>').join(''))+
+    '</div>';
 }
-$('admbody').addEventListener('change',async e=>{
-  const x=e.target.closest('[data-hoff]');if(!x)return;
-  const c=x.dataset.hoff;
-  if(await act(()=>rpc('set_hijri_offset',{p_country:c,p_days:parseInt(x.value,10)}).then(()=>true))){HMC=[];await openAdmin(true);amsg('Saved. Hijri dates for members in '+cname(c)+' are updated.');refreshPill()}
+$('admbody').addEventListener('input',e=>{
+  if(e.target.id!=='membersearch')return;
+  admMembersQuery=e.target.value;
+  renderMembersList();
 });
 $('admbody').addEventListener('click',async e=>{
   const t=e.target;let x;
+  if(x=t.closest('#allMembersToggle')){
+    admMembersOpen=!admMembersOpen;
+    x.setAttribute('aria-expanded',String(admMembersOpen));
+    $('allMembersPanel').hidden=!admMembersOpen;
+    if(admMembersOpen)renderMembersList();
+    return;
+  }
+  if(x=t.closest('[data-hoffstep]')){
+    const row=x.closest('[data-hoffcountry]'),c=row.dataset.hoffcountry,cur=parseInt(row.dataset.hoffdays,10)||0;
+    const nd=Math.max(-2,Math.min(2,cur+(x.dataset.hoffstep==='up'?1:-1)));
+    if(nd===cur)return;
+    if(await act(()=>rpc('set_hijri_offset',{p_country:c,p_days:nd}).then(()=>true))){HMC=[];await openAdmin(true);amsg('Saved. Hijri dates for members in '+cname(c)+' are updated.');refreshPill()}
+    return;
+  }
   if(x=t.closest('[data-req]')){const ok=x.dataset.ok==='1';if(await act(()=>rpc('decide_access',{p_user:x.dataset.req,p_approve:ok}).then(()=>true))){await openAdmin(true);amsg(ok?'Approved. They can sign in now.':'Request declined.')}return}
   if(x=t.closest('[data-claim]')){const ok=x.dataset.ok==='1';if(await act(()=>rpc('decide_claim',{p_user:x.dataset.claim,p_approve:ok}).then(()=>true))){await openAdmin(true);amsg(ok?'Confirmed. Their login is now connected to that record.':'Request declined.')}return}
   if(x=t.closest('[data-role]')){const r=x.dataset.role;if(await act(()=>rpc('set_member_role',{p_user:x.dataset.user,p_role:r}).then(()=>true))){await openAdmin(true);amsg(r==='moderator'?'They are now a moderator.':'They are now a member.')}return}
