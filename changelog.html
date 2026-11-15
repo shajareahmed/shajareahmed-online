@@ -38,6 +38,17 @@
 <main>
 
   <div class="entry">
+    <div class="head"><span class="ver">Ver T3HN</span><span class="date">15 Nov 2026</span></div>
+    <ul>
+      <li>Admin page reordered: App version, Waiting for approval, "This is me" requests, Invite someone, Group invitation link, Add a member directly, Recent Members, All Members, Feedback, Hijri dates by country, then Activity log last.</li>
+      <li>Members is now split into "Recent Members" (the 5 most recent, read-only glance) and a collapsible "All Members" section with a search box to filter by name or email — the moderator/admin actions (make moderator, switch access, connect to a person, etc.) live there.</li>
+      <li>Hijri dates by country: replaced the dropdown with +/− buttons (now covering the full ±2 day range the database already allowed), added a live "Today there: ..." preview of the resulting Hijri date, and a "Last changed by [name] on [date]" line — making visible what was already true underneath, that the most recent save for a country is the one that applies to everyone living there.</li>
+      <li>Activity log: entries are now grouped into one block per person, covering a run of their edits as long as no more than 30 minutes passes between them; a longer gap, or someone else's action in between, starts a new block.</li>
+      <li>Needs the attached <code>016_admin_page_updates.sql</code> run once in Supabase (adds join date to the members list and who/when to the Hijri offset list — no new tables, no behaviour change underneath).</li>
+    </ul>
+  </div>
+
+  <div class="entry">
     <div class="head"><span class="ver">Ver P7XK</span><span class="date">15 Nov 2026</span></div>
     <ul>
       <li>New Admin "Activity log" panel — shows recent person edits and membership changes (who, what, when), pulled from the change history the database already keeps automatically. Admins and moderators only.</li>
