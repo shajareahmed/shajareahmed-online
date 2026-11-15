@@ -367,7 +367,7 @@ html[dir="rtl"] .step{margin:4px 0 6px 40px}
       <div class="acts" style="justify-content:center"><button class="btn pri" id="pcheck" type="button">Check again</button><button class="btn" id="out2" type="button">Sign out</button></div>
     </div>
     <p class="msg info" id="gatemsg">Opening the family archive…</p>
-    <p class="ver">Ref N5XQ</p>
+    <p class="ver">Ref W8KD</p>
   </div>
 </div>
 
@@ -903,6 +903,10 @@ function buildTree(){
   for(const id of TREE){if(id===ROOT)continue;const f=father(id);TP[id]=f&&TREE.has(f)?f:P[id].par.find(x=>TREE.has(x))}
 }
 const tkids=id=>kids(id).filter(k=>TP[k]===id);
+const otherParent=(k,p)=>P[k].par.find(x=>x!==p);
+const uKey=(p,s)=>p+'~u~'+s;             // identifies one specific marriage/union for expand state
+const soloKidsOf=id=>{const S=spouses(id).filter(s=>!inTree(s));return tkids(id).filter(k=>{const op=otherParent(k,id);return !op||!S.includes(op)})};   // no usable second-parent card
+const unionKidsOf=(id,s)=>tkids(id).filter(k=>otherParent(k,id)===s);
 const inTree=id=>TREE.has(id);
 const host=id=>!id||!P[id]?null:(inTree(id)?id:(spouses(id).find(inTree)||null));
 const TITLE=/^(syed|sayed|saiyed|sayyid|sayyed|mirza|mir|shaikh|sheikh|shaikha|haji|hajji|dr\.?|begum)$/i;
@@ -955,19 +959,84 @@ const nameKey=n=>{const t=n.trim().toLowerCase().split(/\s+/).filter(w=>!/^(syed
 const NW=176,NH=60,GX=18,ROW=124;
 const expanded=new Set();
 let tgt={},tp={},Wd={},cur={},view={x:0,y:0,k:1},anim=null,sel=null,flow=null;
-const SG=10;let OXo={};
+const SG=10;let OXo={},COX={};
 const sps=id=>spouses(id).filter(s=>!inTree(s));   // spouses drawn beside their partner
 const unitW=id=>NW+sps(id).length*(NW+SG);
-function measure(id){const ks=expanded.has(id)?tkids(id):[];let w=unitW(id);if(ks.length)w=Math.max(w,ks.map(measure).reduce((a,b)=>a+b,0)+GX*(ks.length-1));return Wd[id]=w}
+// Every marriage/union gets its own expand state once a person has 2+ spouses, so collapsing
+// one marriage never touches another, or the children they share with the other parent.
+const unionOpen=(hid,wid)=>sps(hid).length>1?expanded.has(uKey(hid,wid)):expanded.has(hid);
+function expandAllUnions(id){   // show this person's children, whichever marriage they're from
+  if(sps(id).length>1){
+    if(soloKidsOf(id).length)expanded.add(id);
+    for(const s of sps(id))if(unionKidsOf(id,s).length)expanded.add(uKey(id,s));
+  }else expanded.add(id);
+}
+function openAll(id){   // deep: open every marriage below id, all the way down
+  if(sps(id).length>1){
+    if(soloKidsOf(id).length){expanded.add(id);soloKidsOf(id).forEach(openAll)}
+    for(const s of sps(id)){const uk=unionKidsOf(id,s);if(uk.length){expanded.add(uKey(id,s));uk.forEach(openAll)}}
+  }else if(tkids(id).length){expanded.add(id);tkids(id).forEach(openAll)}
+}
+function measure(id){
+  const S=sps(id);
+  if(S.length<=1){
+    const ks=expanded.has(id)?tkids(id):[];
+    let w=unitW(id);
+    if(ks.length)w=Math.max(w,ks.map(measure).reduce((a,b)=>a+b,0)+GX*(ks.length-1));
+    return Wd[id]=w;
+  }
+  const solo=expanded.has(id)?soloKidsOf(id):[];
+  let idW=NW;
+  if(solo.length)idW=Math.max(NW,solo.map(measure).reduce((a,b)=>a+b,0)+GX*(solo.length-1));
+  Wd['~solo~'+id]=idW;
+  let total=idW;
+  for(const s of S){
+    const uk=expanded.has(uKey(id,s))?unionKidsOf(id,s):[];
+    let sw=NW;
+    if(uk.length)sw=Math.max(NW,uk.map(measure).reduce((a,b)=>a+b,0)+GX*(uk.length-1));
+    Wd['~u~'+id+'~'+s]=sw;
+    total+=SG+sw;
+  }
+  return Wd[id]=total;
+}
 function place(id,left,depth,parent){
-  const sp=sps(id),x=left+(Wd[id]-unitW(id))/2+NW/2,y=depth*ROW;
+  const S=sps(id);
+  if(S.length<=1){
+    const sp=S,x=left+(Wd[id]-unitW(id))/2+NW/2,y=depth*ROW;
+    tgt[id]={x,y,d:depth};tp[id]=parent;
+    sp.forEach((s,i)=>{if(!tgt[s])tgt[s]={x:x+(i+1)*(NW+SG),y,d:depth,sp:id}});
+    OXo[id]=sp.length===1?(NW+SG)/2:0;      // children hang from the middle of a couple
+    if(!expanded.has(id))return;
+    const ks=tkids(id);if(!ks.length)return;
+    let cl=left+(Wd[id]-(ks.reduce((a,k)=>a+Wd[k],0)+GX*(ks.length-1)))/2;
+    for(const k of ks){COX[k]=OXo[id];place(k,cl,depth+1,id);cl+=Wd[k]+GX}
+    return;
+  }
+  const idW=Wd['~solo~'+id],y=depth*ROW,x=left+idW/2;
   tgt[id]={x,y,d:depth};tp[id]=parent;
-  sp.forEach((s,i)=>{if(!tgt[s])tgt[s]={x:x+(i+1)*(NW+SG),y,d:depth,sp:id}});
-  OXo[id]=sp.length===1?(NW+SG)/2:0;      // children hang from the middle of a couple
-  if(!expanded.has(id))return;
-  const ks=tkids(id);if(!ks.length)return;
-  let cl=left+(Wd[id]-(ks.reduce((a,k)=>a+Wd[k],0)+GX*(ks.length-1)))/2;
-  for(const k of ks){place(k,cl,depth+1,id);cl+=Wd[k]+GX}
+  if(expanded.has(id)){
+    const solo=soloKidsOf(id);
+    if(solo.length){
+      let cl=left+(idW-(solo.reduce((a,k)=>a+Wd[k],0)+GX*(solo.length-1)))/2;
+      for(const k of solo){COX[k]=0;place(k,cl,depth+1,id);cl+=Wd[k]+GX}
+    }
+  }
+  let cursor=left+idW;
+  for(const s of S){
+    const sw=Wd['~u~'+id+'~'+s];
+    cursor+=SG;
+    const sx=cursor+sw/2;
+    tgt[s]={x:sx,y,d:depth,sp:id};
+    const off=(sx-x)/2;
+    if(expanded.has(uKey(id,s))){
+      const uk=unionKidsOf(id,s);
+      if(uk.length){
+        let cl=cursor+(sw-(uk.reduce((a,k)=>a+Wd[k],0)+GX*(uk.length-1)))/2;
+        for(const k of uk){COX[k]=off;place(k,cl,depth+1,id);cl+=Wd[k]+GX}
+      }
+    }
+    cursor+=sw;
+  }
 }
 // Someone who married into the line on show: their own parents are drawn above them, in the nearest free space of the row above.
 let XE=[],UPC=new Set();const hideUp=new Set();      // UPC: people whose parents can be shown above them; hideUp: those folded away
@@ -982,7 +1051,7 @@ function placeInlaws(){
     return cx;
   };
   // only for couples whose own family is open, so a large tree is not crowded with every in-law
-  let todo=Object.keys(tgt).filter(id=>tgt[id].sp&&expanded.has(tgt[id].sp)).sort((a,b)=>tgt[a].d-tgt[b].d||tgt[a].x-tgt[b].x).map(id=>[id,0]);
+  let todo=Object.keys(tgt).filter(id=>tgt[id].sp&&unionOpen(tgt[id].sp,id)).sort((a,b)=>tgt[a].d-tgt[b].d||tgt[a].x-tgt[b].x).map(id=>[id,0]);
   while(todo.length){
     const [s,gen]=todo.shift(),t=tgt[s];
     const ps=P[s].par.slice().sort((a,b)=>(P[a].s==='m'?0:1)-(P[b].s==='m'?0:1));
@@ -998,7 +1067,7 @@ function placeInlaws(){
     XE.push({ps,to:s});
   }
 }
-function layout(){tgt={};tp={};Wd={};OXo={};XE=[];if(ROOT){measure(ROOT);place(ROOT,0,0,null);placeInlaws()}}
+function layout(){tgt={};tp={};Wd={};OXo={};COX={};XE=[];if(ROOT){measure(ROOT);place(ROOT,0,0,null);placeInlaws()}}
 
 /* ---------- Rendering ---------- */
 const $=id=>document.getElementById(id);
@@ -1007,13 +1076,21 @@ const els={};
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const desktop=()=>matchMedia('(min-width:900px)').matches;
 function nodeHTML(id){
-  const p=P[id],isSp=!!(tgt[id].sp||tgt[id].il),n=isSp?0:tkids(id).length,c=completeness(id);
+  const p=P[id],t=tgt[id],isSp=!!(t.sp||t.il),c=completeness(id);
+  let n=0,togOn=false,togKey=id;
+  if(t.sp){                                   // a spouse card: toggle is her own marriage's children, if any
+    const hid=t.sp;
+    if(sps(hid).length>1){const uk=unionKidsOf(hid,id);if(uk.length){n=uk.length;togKey=uKey(hid,id);togOn=expanded.has(togKey)}}
+  }else if(!t.il){                            // a person in the main line: children with no card of their own (solo), or all children if only one marriage
+    const S=sps(id);
+    n=(S.length>1?soloKidsOf(id):tkids(id)).length;togOn=expanded.has(id);
+  }
   const tsp=isSp?[]:spouses(id).filter(inTree);
   const sub=esc(years(p))+(tsp.length?' · & '+esc(first(tsp[0])):'');
   return '<span class="av" style="--p:'+c.pct+'"><b>'+esc(initials(p))+'</b></span>'+
     '<span class="tx'+(p.nick&&p.known?' hasnk':'')+'"><span class="nm">'+esc(p.name)+'</span>'+(p.nick&&p.known?'<span class="nk">'+esc(p.known)+'</span>':'')+'<span class="sb">'+sub+'</span></span>'+
     (p.v?'<i class="gem" title="Verified"></i>':'')+(id===ME?'<span class="you">You</span>':'')+
-    (n?'<button class="tog'+(expanded.has(id)?' open':'')+'" data-tog="1" aria-label="'+(expanded.has(id)?'Collapse':'Expand')+' children">'+n+'</button>':'')+
+    (n?'<button class="tog'+(togOn?' open':'')+'" data-tog="'+esc(togKey)+'" aria-label="'+(togOn?'Collapse':'Expand')+' children">'+n+'</button>':'')+
     (UPC.has(id)?'<button class="tog up'+(hideUp.has(id)?'':' open')+'" data-up="1" aria-label="'+(hideUp.has(id)?'Show their parents':'Hide their parents')+'"></button>':'')+
     (isSp&&!inTree(id)&&(p.par.length||siblings(id).length)?'<button class="tog side" data-side="1" aria-label="Show this side of the family" title="Show this side of the family"><svg viewBox="0 0 24 24"><path d="M4 8h15M15 4l4 4-4 4M20 16H5M9 12l-4 4 4 4"/></svg></button>':'');
 }
@@ -1034,7 +1111,7 @@ function draw(){
     el.style.transform='translate('+(c.x-NW/2)+'px,'+c.y+'px)';
     if(t.sp){d+='M'+(c.x-NW/2-SG)+','+(c.y+NH/2)+'h'+SG;continue}   // marriage link
     const pr=tp[id];
-    if(pr&&cur[pr]){const a=cur[pr],o=OXo[pr]||0,ax=a.x+o,yb=a.y+NH,y2=c.y,my=(yb+y2)/2;
+    if(pr&&cur[pr]){const a=cur[pr],o=COX[id]||0,ax=a.x+o,yb=a.y+NH,y2=c.y,my=(yb+y2)/2;
       d+='M'+ax+','+(o?a.y+NH/2:yb)+(o?'V'+yb:'')+'C'+ax+','+my+' '+c.x+','+my+' '+c.x+','+y2}
   }
   epath.setAttribute('d',d);
@@ -1072,13 +1149,20 @@ function frame(){
   return {w,h:Math.max(140,h-cover)};
 }
 function viewFor(id,k){const f=frame(),t=tgt[id];k=k||Math.max(view.k,0.85);return {k,x:f.w/2-t.x*k,y:Math.max(70,f.h/2-NH/2*k+18)-t.y*k}}
-function reveal(id){let c=TP[id];while(c){expanded.add(c);c=TP[c]}}
+function reveal(id){
+  let c=id;
+  while(TP[c]){
+    const p=TP[c],op=otherParent(c,p);
+    expanded.add(op&&sps(p).length>1?uKey(p,op):p);
+    c=p;
+  }
+}
 function focus(id,opts){
   opts=opts||{};
   if(!P[id])return;
   if(opts.side?!inTree(id):(!host(id)&&!tgt[id])){rootAnchor=id;buildTree();cur={};toast('Showing '+first(id)+'’s side of the family. Use the Home button to return.')}
   const h=host(id);
-  if(h){reveal(h);if(opts.expand)expanded.add(h)}
+  if(h){reveal(h);if(opts.expand)expandAllUnions(h)}
   sel=id;if(!opts.keepFlow)flow=null;
   layout();renderSheet();
   run(viewFor(tgt[id]?id:h,opts.k));
@@ -1092,7 +1176,7 @@ function fitTo(ids,maxK){
 // A member's own immediate family: spouse and children if they have any, otherwise parents and siblings.
 function familyOf(id){
   const sp=spouses(id),ks=kids(id);
-  if(sp.length||ks.length){const h=host(id);if(h)expanded.add(h);return [id,...sp,...ks]}
+  if(sp.length||ks.length){const h=host(id);if(h)expandAllUnions(h);return [id,...sp,...ks]}
   return [id,...P[id].par,...siblings(id)];
 }
 function fitAll(){
@@ -1144,15 +1228,16 @@ function tap(target){
   $('results').classList.remove('on');
   if(!n)return;
   const id=n.dataset.id;
-  if(target.closest('[data-tog]')){toggle(id);return}
+  if(target.closest('[data-tog]')){toggle(id,target.closest('[data-tog]').dataset.tog);return}
   if(target.closest('[data-side]')){focus(id,{side:true,expand:true});return}
   if(target.closest('[data-up]')){hideUp.has(id)?hideUp.delete(id):hideUp.add(id);const b=tgt[id];layout();const a=tgt[id];run({k:view.k,x:view.x+(b.x-a.x)*view.k,y:view.y+(b.y-a.y)*view.k});return}
   if(sel===id){flow=null;sel=null;renderSheet();syncEls();return}
   focus(id,{expand:true});
 }
-function toggle(id){
+function toggle(id,key){
+  key=key||id;
   const before=tgt[id];
-  expanded.has(id)?expanded.delete(id):expanded.add(id);
+  expanded.has(key)?expanded.delete(key):expanded.add(key);
   layout();
   const a=tgt[id];
   run({k:view.k,x:view.x+(before.x-a.x)*view.k,y:view.y+(before.y-a.y)*view.k});
@@ -1544,7 +1629,7 @@ async function saveForm(){
   if(ed){flow=null;layout();run();renderSheet();toast('Saved');return}
   flow={step:'done',rel:f.rel,of:f.rel==='first'?id:f.of,newId:id};sel=id;
   if(!host(id)){rootAnchor=id;buildTree()}
-  const hh=host(id);reveal(hh);if(TP[hh])expanded.add(TP[hh]);expanded.add(hh);if(f.rel==='child')expanded.add(host(f.of));
+  const hh=host(id);reveal(hh);expandAllUnions(hh);if(f.rel==='child')expandAllUnions(host(f.of));
   layout();renderSheet();run(viewFor(tgt[id]?id:hh));
 }
 function startFlow(rel,of){openForm({mode:'add',rel,of});return;
@@ -1671,7 +1756,7 @@ async function createPerson(pending){
   f.newId=id;f.step='born';sel=id;
   const h=host(id);
   if(!h){rootAnchor=id;buildTree()}
-  const hh=host(id);reveal(hh);if(TP[hh])expanded.add(TP[hh]);expanded.add(hh);if(f.rel==='child')expanded.add(host(f.of));
+  const hh=host(id);reveal(hh);expandAllUnions(hh);if(f.rel==='child')expandAllUnions(host(f.of));
   layout();renderSheet();run(viewFor(tgt[id]?id:hh));
 }
 function afterBorn(){
@@ -1727,7 +1812,7 @@ body.addEventListener('click',async e=>{
   else if(a==='form-save'){await saveForm()}
   else if(a==='photo-soon'){toast('Photos: this feature is coming soon')}
   else if(a==='verify'){const id=sel;if(await busy(()=>rpc('update_person',{p_id:id,p_changes:{status:'verified'}}).then(()=>true))){await busy(refresh);layout();run();renderSheet();toast(first(id)+' is now verified')}}
-  else if(a==='line'){(function open(id){expanded.add(id);tkids(id).forEach(open)})(sel);layout();run(viewFor(sel,Math.min(view.k,0.6)));toast('Opened every generation below '+first(sel))}
+  else if(a==='line'){openAll(sel);layout();run(viewFor(sel,Math.min(view.k,0.6)));toast('Opened every generation below '+first(sel))}
   else if(a==='side'){focus(sel,{side:true,expand:true})}
   else if(a==='cancel'){flow=null;renderSheet()}
   else if(a==='link-yes'){const lu=linkUser,pid=sel;if(await busy(()=>rpc('link_member',{p_user:lu.id,p_person:pid}).then(()=>true))){linkUser=null;renderSheet();toast(lu.label+' is now connected to '+P[pid].name)}}
@@ -1937,7 +2022,7 @@ function focusOn(id){
   if(!id||!P[id])return;
   const h=host(id)||id;
   reveal(h);
-  const descIds=[];(function open(x){expanded.add(x);descIds.push(x);tkids(x).forEach(open)})(h);
+  const descIds=[];(function collect(x){descIds.push(x);tkids(x).forEach(collect)})(h);openAll(h);
   sel=id;flow=null;focusTarget=id;
   layout();renderSheet();
   const ancIds=[];{let c=h;while(c){ancIds.push(c);c=TP[c]}}
@@ -2339,7 +2424,7 @@ async function enter(){
   if(!ME){try{const c=await rpc('my_claim');if(c&&c.status==='pending'&&P[c.person_id])myClaim=c}catch(_){}}
   expanded.clear();
   const home=ME||ROOT;
-  if(home){let c=home;expanded.add(c);while(TP[c]){c=TP[c];expanded.add(c)}}
+  if(home){reveal(home);expandAllUnions(home)}
   const fam=ME?familyOf(ME):null;
   $('mmembers').hidden=!(ROLE==='admin'||ROLE==='moderator');linkUser=null;setContrib(false,true);
   await loadSettings();
