@@ -153,8 +153,10 @@ main{flex:1;min-height:0;display:flex;position:relative}
 .toast.err{background:var(--bad)}
 
 /* Sheet (phone) / side panel (desktop) */
-#sheet{position:absolute;left:0;right:0;bottom:0;max-height:66%;background:var(--paper);border-top:2px solid var(--gold);border-radius:20px 20px 0 0;box-shadow:0 -8px 28px rgba(122,92,16,.22);transform:translateY(105%);transition:transform .3s cubic-bezier(.2,.8,.2,1);z-index:8;display:flex;flex-direction:column}
+#sheet{position:absolute;left:0;right:0;bottom:0;max-height:66%;background:var(--paper);border-top:2px solid var(--gold);border-radius:20px 20px 0 0;box-shadow:0 -8px 28px rgba(122,92,16,.22);transform:translateY(105%);transition:transform .3s cubic-bezier(.2,.8,.2,1),max-height .3s cubic-bezier(.2,.8,.2,1);z-index:8;display:flex;flex-direction:column;touch-action:pan-y}
 #sheet.on{transform:none}
+#sheet.full{max-height:92vh;max-height:92dvh}
+#sheet.dragging{transition:none}
 #sheet.busy{pointer-events:none;opacity:.7}
 #sheet::before{content:"";flex:none;width:40px;height:4px;border-radius:2px;background:var(--line);margin:8px auto 0}
 .x{position:absolute;right:10px;top:10px;width:36px;height:36px;border-radius:50%;border:0;background:var(--ivory);font-size:18px;line-height:1;color:var(--muted);z-index:1}
@@ -226,9 +228,9 @@ textarea.field{height:auto;min-height:84px;padding:10px 14px;resize:vertical}
   .empty{display:block}
   .brand b{font-size:19px}
   .panelToggle{display:flex;align-items:center;justify-content:center;position:absolute;left:-14px;top:18px;width:28px;height:28px;padding:0;border-radius:50%;border:1.5px solid var(--gold);background:var(--paper);color:var(--gold-deep);box-shadow:0 2px 6px rgba(122,92,16,.18);z-index:3}
-  .panelToggle svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;transition:transform .25s ease}
-  .panelToggle.collapsed svg{transform:rotate(180deg)}
-  #sheet.collapsed{width:22px;overflow:hidden}
+  .panelToggle svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;transition:transform .25s ease;transform:rotate(180deg)}
+  .panelToggle.collapsed svg{transform:rotate(0deg)}
+  #sheet.collapsed{width:22px;overflow:visible}
   #sheet.collapsed #body{display:none}
 }
 @media (prefers-reduced-motion:reduce){#sheet,.toast{transition:none}}
@@ -365,7 +367,7 @@ html[dir="rtl"] .step{margin:4px 0 6px 40px}
       <div class="acts" style="justify-content:center"><button class="btn pri" id="pcheck" type="button">Check again</button><button class="btn" id="out2" type="button">Sign out</button></div>
     </div>
     <p class="msg info" id="gatemsg">Opening the family archive…</p>
-    <p class="ver">Ref R8LC</p>
+    <p class="ver">Ref N5XQ</p>
   </div>
 </div>
 
@@ -1174,10 +1176,10 @@ const who=id=>id===ME?'your':esc(first(id))+'’s';
 function renderSheet(){
   refreshIdBanner();
   if(!flow&&!Object.keys(P).length){openForm({mode:'add',rel:'first'});return}
-  if(flow){renderFlow();sheet.classList.add('on');return}
+  if(flow){renderFlow();sheet.style.transform='';sheet.classList.add('on');return}
   if(!sel||!P[sel]){
     body.innerHTML='<div class="empty"><h2>Explore the family</h2><p class="help">Drag to move around. Scroll or pinch to zoom. Select a person to open their branch, see their details and add their relatives.</p><p class="help">The gold ring around each person shows how complete their record is. A diamond marks a verified record; a dashed outline means not yet verified.</p></div>';
-    sheet.classList.remove('on');return;
+    sheet.style.transform='';sheet.classList.remove('on');return;
   }
   const p=P[sel],c=completeness(sel),ks=kids(sel),sp=spouses(sel),sib=siblings(sel);
   const rel=relName(ME,sel),mod=ROLE==='moderator'||ROLE==='admin';
@@ -1206,6 +1208,7 @@ function renderSheet(){
       (!inTree(sel)&&(P[sel].par.length||siblings(sel).length)?'<button class="btn" data-act="side">Show this side of the family</button>':'')+'</div>'+
     (contrib?'':'<p class="help">To add relatives or correct details, choose Contribute at the top.</p>');
   body.scrollTop=0;
+  sheet.style.transform='';
   sheet.classList.add('on');
 }
 
@@ -1851,7 +1854,63 @@ function dateFieldChanged(e){
 body.addEventListener('input',dateFieldChanged);
 body.addEventListener('change',dateFieldChanged);
 body.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.classList.contains('field')){e.preventDefault();const b=body.querySelector('.btn.pri');if(b)b.click()}});
-$('close').addEventListener('click',()=>{flow=null;sel=null;renderSheet();syncEls()});
+function closeSheet(){flow=null;sel=null;renderSheet();syncEls();setSheetFull(false)}
+$('close').addEventListener('click',closeSheet);
+
+/* ---------- Sheet swipe (phone): drag down to close, drag up to expand ---------- */
+let sheetFull=false;
+function setSheetFull(on){sheetFull=on;sheet.classList.toggle('full',on)}
+(function(){
+  let startY=null,curY=0,dragging=false,fromHandle=false,blocked=false;
+  const CLOSE_PX=90,SNAP_PX=46,ENGAGE_PX=8;
+  sheet.addEventListener('touchstart',e=>{
+    if(desktop()||!sheet.classList.contains('on')){startY=null;return}
+    const t=e.touches[0];
+    startY=curY=t.clientY;dragging=false;blocked=false;
+    const r=sheet.getBoundingClientRect();
+    fromHandle=(t.clientY-r.top)<24;
+  },{passive:true});
+  sheet.addEventListener('touchmove',e=>{
+    if(startY===null||blocked)return;
+    const t=e.touches[0];curY=t.clientY;
+    const dy=curY-startY;
+    if(!dragging){
+      if(Math.abs(dy)<ENGAGE_PX)return;
+      const atTop=body.scrollTop<=0;
+      if(dy<0){ // dragging up (expand)
+        if(sheetFull||(!fromHandle&&!atTop)){blocked=true;return}
+      }else{ // dragging down (collapse/close)
+        if(!fromHandle&&!atTop){blocked=true;return}
+      }
+      dragging=true;sheet.classList.add('dragging');
+    }
+    e.preventDefault();
+    let vis=dy;
+    if(vis<0)vis=Math.max(vis,-50)*0.5; // rubber-band feel on the upward pull, real expand happens on release
+    if(sheetFull&&vis<0)vis=0;
+    sheet.style.transform='translateY('+Math.max(vis,0)+'px)';
+  },{passive:false});
+  function end(){
+    if(!dragging){startY=null;return}
+    const dy=curY-startY;
+    sheet.classList.remove('dragging');
+    if(dy>CLOSE_PX){
+      sheet.style.transform='translateY(105%)';
+      setTimeout(closeSheet,0);
+    }else if(dy<-SNAP_PX&&!sheetFull){
+      sheet.style.transform='';
+      setSheetFull(true);
+    }else if(dy>SNAP_PX&&sheetFull){
+      sheet.style.transform='';
+      setSheetFull(false);
+    }else{
+      sheet.style.transform='';
+    }
+    startY=null;dragging=false;
+  }
+  sheet.addEventListener('touchend',end);
+  sheet.addEventListener('touchcancel',end);
+})();
 let panelCollapsed=false;
 function setPanelCollapsed(on){
   panelCollapsed=on;
@@ -2293,7 +2352,7 @@ async function enter(){
   if(ME&&Object.keys(P).length===1){sel=ME;renderSheet();run(viewFor(ME));toast('Welcome. Choose Contribute to start adding your family.')}
   refreshPill();
 }
-async function signOut(){if(sb)await sb.auth.signOut();for(const id in els){els[id].remove();delete els[id]}P={};tgt={};cur={};epath.setAttribute('d','');sel=null;flow=null;linkUser=null;myClaim=null;sheet.classList.remove('on');$('upill').hidden=true;$('upop').hidden=true;$('cal').hidden=true;$('evd').hidden=true;HMC=[];SET=null;CALOK=false;idBannerDismissed=false;$('idbanner').classList.remove('on');setView('tree');showGate('login','')}
+async function signOut(){if(sb)await sb.auth.signOut();for(const id in els){els[id].remove();delete els[id]}P={};tgt={};cur={};epath.setAttribute('d','');sel=null;flow=null;linkUser=null;myClaim=null;sheet.classList.remove('on');setSheetFull(false);sheet.style.transform='';$('upill').hidden=true;$('upop').hidden=true;$('cal').hidden=true;$('evd').hidden=true;HMC=[];SET=null;CALOK=false;idBannerDismissed=false;$('idbanner').classList.remove('on');setView('tree');showGate('login','')}
 $('out').addEventListener('click',signOut);$('out2').addEventListener('click',signOut);
 function authMsg(error){
   const m=(error&&error.message)||'';
