@@ -63,6 +63,8 @@ button:disabled{opacity:.55;cursor:default}
 @media (max-width:899px){#viewsw{display:none}.mview{display:block}}
 .menu{position:absolute;inset-inline-end:10px;top:calc(100% + 4px);z-index:30;background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 22px rgba(122,92,16,.2);display:flex;flex-direction:column;min-width:220px;overflow:hidden}
 .menu button{text-align:start;padding:12px 16px;border:0;border-bottom:1px solid var(--ivory);background:none;min-height:46px;font-weight:600}
+#rearrangePanel{display:flex;flex-direction:column;background:var(--ivory)}
+#rearrangePanel button{padding-inline-start:28px}
 #viewsPanel{display:flex;flex-direction:column;background:var(--ivory)}
 #viewsPanel #saveViewBtn{border-bottom:1px solid var(--line);color:var(--gold-deep)}
 .vslot{display:flex;align-items:center;gap:6px;padding:10px 16px 10px 28px;border-bottom:1px solid var(--line);font-size:13px}
@@ -163,6 +165,7 @@ body.arrows-off .tog.collapse,body.arrows-off .restorerow{display:none!important
 .ctl button{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--gold);background:var(--paper);color:var(--gold-deep);font-size:21px;font-weight:700;line-height:1;display:grid;place-items:center;box-shadow:0 3px 10px rgba(122,92,16,.15)}
 .ctl svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
 .note{position:absolute;left:12px;bottom:10px;font-size:11.5px;color:var(--muted);background:rgba(255,253,246,.85);border-radius:999px;padding:3px 10px;z-index:1;pointer-events:none}
+.verwm{position:absolute;right:12px;bottom:10px;font-size:10.5px;color:var(--muted);opacity:.65;background:rgba(255,253,246,.7);border-radius:999px;padding:3px 9px;z-index:1;pointer-events:none;letter-spacing:.03em}
 .idbanner{display:none;position:absolute;left:50%;top:64px;transform:translateX(-50%);z-index:6;background:var(--paper);border:1.5px solid var(--gold);border-radius:999px;padding:7px 8px 7px 14px;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(122,92,16,.2);max-width:calc(100% - 24px)}
 .idbanner.on{display:flex}
 .idbanner span{font-size:12.5px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -399,7 +402,7 @@ html[dir="rtl"] .step{margin:4px 0 6px 40px}
       <div class="acts" style="justify-content:center"><button class="btn pri" id="pcheck" type="button">Check again</button><button class="btn" id="out2" type="button">Sign out</button></div>
     </div>
     <p class="msg info" id="gatemsg">Opening the family archive…</p>
-    <p class="ver">Ref K2FY</p>
+    <p class="ver" id="verLogin"></p>
   </div>
 </div>
 
@@ -423,7 +426,12 @@ html[dir="rtl"] .step{margin:4px 0 6px 40px}
       <div id="viewSlots"></div>
     </div>
     <button id="mhidden" type="button">Hidden People</button>
-    <button id="mrearrange" type="button" aria-pressed="false">Rearrange</button>
+    <button type="button" id="mrearrange" aria-expanded="false">Rearrange</button>
+    <div id="rearrangePanel" hidden>
+      <button id="mrearrangeToggle" type="button">Rearrange Tiles</button>
+      <button id="mrearrangeDiscard" type="button">Discard Current Changes</button>
+      <button id="mrearrangeResetAll" type="button">Reset All Rearrangements</button>
+    </div>
     <button id="mcal" type="button">Family Calendar</button>
     <button id="mfeedback" type="button">Send feedback</button>
     <button id="mmembers" type="button" hidden>Admin</button>
@@ -454,6 +462,7 @@ html[dir="rtl"] .step{margin:4px 0 6px 40px}
       <button id="fit" aria-label="Show whole tree" title="Show whole tree"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
     </div>
     <div class="note" id="note"></div>
+    <div class="verwm" id="verwm" aria-hidden="true"></div>
     <div class="idbanner" id="idbanner">
       <span>Is one of these records you?</span>
       <button class="btn" id="idbfind" type="button">Find yourself</button>
@@ -1025,7 +1034,7 @@ let hidden=new Set(),forceKids=new Set();   // personal view: people collapsed f
 let permHidden=new Set();                   // people permanently hidden from this member's view (persisted; see Hidden People)
 const isHidden=id=>hidden.has(id)||permHidden.has(id);
 let tgt={},tp={},Wd={},cur={},view={x:0,y:0,k:1},anim=null,sel=null,flow=null;
-let rearrangeMode=false,nudge={};   // per-session manual drag offsets (also saved/restored inside a Custom View), keyed by the person dragged
+let rearrangeMode=false,nudge={},rearrangeSnapshot=null;   // nudge: per-session manual drag offsets (also saved/restored inside a Custom View), keyed by the person dragged. rearrangeSnapshot: nudge as it stood when the current Rearrange Tiles session began, so Discard can undo just this session.
 let dragNode=null,dragSub=null,dragBase=null,dragStart=null,dragMoved=false,dragTarget=null;
 // Everyone who must travel together when `id` is dragged: id itself, their own spouse card(s), and every descendant (and the descendants' own spouses), found by walking tp[]/tgt[].sp.
 function subtreeIds(id){
@@ -1166,6 +1175,11 @@ function layout(){
 const $=id=>document.getElementById(id);
 const stage=$('stage'),world=$('world'),epath=$('epath'),sheet=$('sheet'),body=$('body');
 const els={};
+/* Build version: update BUILD_VER and BUILD_DATE (YYYY-MM-DD) with every build you ship. */
+const BUILD_VER='N4QZ',BUILD_DATE='2026-11-15';
+const buildDateLong=()=>{const d=new Date(BUILD_DATE+'T00:00:00');return isNaN(d)?BUILD_DATE:d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})};
+$('verLogin').textContent='Ver '+BUILD_VER;
+$('verwm').textContent='v'+BUILD_VER;
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const desktop=()=>matchMedia('(min-width:900px)').matches;
 function nodeHTML(id){
@@ -1606,13 +1620,44 @@ async function openHiddenPeople(){
 }
 function closeHiddenPeople(){$('hiddenp').hidden=true;layout();run()}
 $('mhidden').addEventListener('click',()=>{$('menupop').hidden=true;openHiddenPeople()});
+$('mrearrange').addEventListener('click',e=>{
+  e.stopPropagation();
+  const willOpen=$('rearrangePanel').hidden;
+  $('rearrangePanel').hidden=!willOpen;
+  $('mrearrange').setAttribute('aria-expanded',String(willOpen));
+});
 function setRearrange(on){
   rearrangeMode=on;
   document.body.classList.toggle('rearranging',on);
-  const b=$('mrearrange');b.textContent=on?'Exit Rearrange':'Rearrange';b.setAttribute('aria-pressed',on?'true':'false');
-  toast(on?'Drag any card to move it and everyone below them. Open the menu and tap “Exit Rearrange” when done.':'Rearrange off.');
+  $('mrearrangeToggle').textContent=on?'Exit Rearrange':'Rearrange Tiles';
 }
-$('mrearrange').addEventListener('click',()=>{$('menupop').hidden=true;setRearrange(!rearrangeMode)});
+$('mrearrangeToggle').addEventListener('click',e=>{
+  e.stopPropagation();
+  if(!rearrangeMode){
+    rearrangeSnapshot={...nudge};
+    setRearrange(true);
+    $('menupop').hidden=true;$('rearrangePanel').hidden=true;$('mrearrange').setAttribute('aria-expanded','false');
+    toast('Drag any card to move it and everyone below them. Open the menu and choose Rearrange to finish up.');
+  }else{
+    rearrangeSnapshot=null;
+    setRearrange(false);
+    $('menupop').hidden=true;
+    toast('Your rearranging has been saved.');
+  }
+});
+$('mrearrangeDiscard').addEventListener('click',e=>{
+  e.stopPropagation();$('menupop').hidden=true;
+  if(!rearrangeSnapshot){toast('There’s nothing to discard yet.');return}
+  nudge={...rearrangeSnapshot};rearrangeSnapshot={...nudge};
+  layout();run();
+  toast('Changes from this session have been discarded.');
+});
+$('mrearrangeResetAll').addEventListener('click',e=>{
+  e.stopPropagation();$('menupop').hidden=true;
+  nudge={};if(rearrangeSnapshot)rearrangeSnapshot={};
+  layout();run();
+  toast('Every manual rearrangement has been reset.');
+});
 $('hpclose').addEventListener('click',closeHiddenPeople);
 $('hpsearch').addEventListener('input',()=>{
   const q=$('hpsearch').value;
@@ -1655,6 +1700,8 @@ const day=d=>{try{return new Date(d).toLocaleDateString(undefined,{day:'numeric'
 function renderAdmin(){
   const a=adm,isAdm=ROLE==='admin';
   $('admbody').innerHTML=
+    '<div class="panel"><h3>App version</h3><p class="help">Current Ver. '+esc(BUILD_VER)+' — updated '+esc(buildDateLong())+'</p></div>'+
+
     '<div class="panel"><h3>Waiting for approval ('+a.reqs.length+')</h3>'+
     (a.reqs.length?a.reqs.map(r=>'<div class="row"><b>'+esc(r.full_name)+'</b><small>'+esc(r.email||'')+' · asked on '+day(r.created_at)+'</small>'+(r.about?'<small>“'+esc(r.about)+'”</small>':'')+
       '<div class="acts"><button class="btn pri" data-req="'+r.user_id+'" data-ok="1">Approve</button><button class="btn" data-req="'+r.user_id+'" data-ok="0">Decline</button></div></div>').join(''):'<div class="none">No one is waiting.</div>')+'</div>'+
