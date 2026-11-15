@@ -234,6 +234,7 @@ h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
 .match dl{display:grid;grid-template-columns:auto 1fr;gap:3px 12px;margin:8px 0 0;font-size:13px}
 .match dt{color:var(--muted)}.match dd{margin:0;font-weight:600}
 .help{font-size:12.5px;color:var(--muted);margin:10px 0 0}
+.help a{color:var(--gold-deep);font-weight:600}
 .empty{display:none}
 .sugg{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:-4px;background:var(--paper)}
 .sugg:empty{display:none}
@@ -429,7 +430,7 @@ html[dir="rtl"] .step{margin:4px 0 6px 40px}
     <button type="button" id="mrearrange" aria-expanded="false">Rearrange</button>
     <div id="rearrangePanel" hidden>
       <button id="mrearrangeToggle" type="button">Rearrange Tiles</button>
-      <button id="mrearrangeDiscard" type="button">Discard Current Changes</button>
+      <button id="mrearrangeDiscard" type="button" hidden>Discard Current Changes</button>
       <button id="mrearrangeResetAll" type="button">Reset All Rearrangements</button>
     </div>
     <button id="mcal" type="button">Family Calendar</button>
@@ -1176,7 +1177,7 @@ const $=id=>document.getElementById(id);
 const stage=$('stage'),world=$('world'),epath=$('epath'),sheet=$('sheet'),body=$('body');
 const els={};
 /* Build version: update BUILD_VER and BUILD_DATE (YYYY-MM-DD) with every build you ship. */
-const BUILD_VER='N4QZ',BUILD_DATE='2026-11-15';
+const BUILD_VER='P7XK',BUILD_DATE='2026-11-15';
 const buildDateLong=()=>{const d=new Date(BUILD_DATE+'T00:00:00');return isNaN(d)?BUILD_DATE:d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})};
 $('verLogin').textContent='Ver '+BUILD_VER;
 $('verwm').textContent='v'+BUILD_VER;
@@ -1367,6 +1368,7 @@ function up(e){
       const prev=nudge[id]||{dx:0,dy:0};
       nudge[id]={dx:prev.dx+dx,dy:prev.dy+dy};
       layout();draw();
+      refreshRearrangePanel();
     }else if(!wasMoved&&target){
       tap(target);
     }
@@ -1575,8 +1577,8 @@ function amsg(t,err){const m=$('admmsg');m.textContent=t||'';m.className='msg'+(
 async function act(fn){try{return await fn()}catch(e){amsg(String(e.message||e).replace(/^ERROR:\s*/,''),true);return undefined}}
 async function openAdmin(keep){
   let d;
-  try{d=await Promise.all([rpc('list_access_requests'),rpc('list_members'),rpc('list_invitations'),rpc('list_claims').catch(()=>[]),rpc('list_group_invites').catch(()=>[]),rpc('list_hijri_offsets').catch(()=>[]),rpc('list_feedback').catch(()=>[])])}catch(e){toast(String(e.message||e),true);return}
-  adm={reqs:d[0]||[],mems:d[1]||[],invs:d[2]||[],claims:d[3]||[],groups:d[4]||[],hoff:d[5]||[],fb:d[6]||[],fresh:keep&&adm?adm.fresh:null,gfresh:keep&&adm?adm.gfresh:null};
+  try{d=await Promise.all([rpc('list_access_requests'),rpc('list_members'),rpc('list_invitations'),rpc('list_claims').catch(()=>[]),rpc('list_group_invites').catch(()=>[]),rpc('list_hijri_offsets').catch(()=>[]),rpc('list_feedback').catch(()=>[]),rpc('list_change_log',{p_limit:100}).catch(()=>null)])}catch(e){toast(String(e.message||e),true);return}
+  adm={reqs:d[0]||[],mems:d[1]||[],invs:d[2]||[],claims:d[3]||[],groups:d[4]||[],hoff:d[5]||[],fb:d[6]||[],activity:d[7],fresh:keep&&adm?adm.fresh:null,gfresh:keep&&adm?adm.gfresh:null};
   if(!keep)amsg('');
   renderAdmin();$('admin').hidden=false;
 }
@@ -1625,11 +1627,15 @@ $('mrearrange').addEventListener('click',e=>{
   const willOpen=$('rearrangePanel').hidden;
   $('rearrangePanel').hidden=!willOpen;
   $('mrearrange').setAttribute('aria-expanded',String(willOpen));
+  if(willOpen)refreshRearrangePanel();
 });
+const hasSessionChanges=()=>!!rearrangeSnapshot&&JSON.stringify(nudge)!==JSON.stringify(rearrangeSnapshot);
+function refreshRearrangePanel(){$('mrearrangeDiscard').hidden=!hasSessionChanges()}
 function setRearrange(on){
   rearrangeMode=on;
   document.body.classList.toggle('rearranging',on);
   $('mrearrangeToggle').textContent=on?'Exit Rearrange':'Rearrange Tiles';
+  refreshRearrangePanel();
 }
 $('mrearrangeToggle').addEventListener('click',e=>{
   e.stopPropagation();
@@ -1647,15 +1653,17 @@ $('mrearrangeToggle').addEventListener('click',e=>{
 });
 $('mrearrangeDiscard').addEventListener('click',e=>{
   e.stopPropagation();$('menupop').hidden=true;
-  if(!rearrangeSnapshot){toast('There’s nothing to discard yet.');return}
+  if(!hasSessionChanges()){toast('There’s nothing to discard yet.');return}
   nudge={...rearrangeSnapshot};rearrangeSnapshot={...nudge};
   layout();run();
+  refreshRearrangePanel();
   toast('Changes from this session have been discarded.');
 });
 $('mrearrangeResetAll').addEventListener('click',e=>{
   e.stopPropagation();$('menupop').hidden=true;
   nudge={};if(rearrangeSnapshot)rearrangeSnapshot={};
   layout();run();
+  refreshRearrangePanel();
   toast('Every manual rearrangement has been reset.');
 });
 $('hpclose').addEventListener('click',closeHiddenPeople);
@@ -1697,10 +1705,18 @@ function shareHTML(url){
     '<a class="btn" href="mailto:?subject='+encodeURIComponent('Invitation to Shajare Ahmed Online')+'&body='+encodeURIComponent(text)+'">Send by email</a></div>';
 }
 const day=d=>{try{return new Date(d).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})}catch(_){return ''}};
+const dayTime=d=>{try{return new Date(d).toLocaleString(undefined,{day:'numeric',month:'short',year:'numeric',hour:'numeric',minute:'2-digit'})}catch(_){return ''}};
 function renderAdmin(){
   const a=adm,isAdm=ROLE==='admin';
   $('admbody').innerHTML=
-    '<div class="panel"><h3>App version</h3><p class="help">Current Ver. '+esc(BUILD_VER)+' — updated '+esc(buildDateLong())+'</p></div>'+
+    '<div class="panel"><h3>App version</h3><p class="help">Current Ver. '+esc(BUILD_VER)+' — updated '+esc(buildDateLong())+'. <a href="changelog.html" target="_blank" rel="noopener">See what has changed, build by build</a>.</p></div>'+
+
+    '<div class="panel"><h3>Activity log'+(a.activity?' ('+a.activity.length+')':'')+'</h3>'+
+    (a.activity===null?'<p class="help">Not available yet — run migration 015 to turn this on.</p>'
+      :!a.activity.length?'<div class="none">Nothing recorded yet.</div>'
+      :'<p class="help">Person edits and membership changes, most recent first. Invitations and “this is me” requests aren’t tracked here yet — see their own sections below.</p>'+
+        a.activity.map(e=>'<div class="row"><b>'+esc(e.summary)+'</b><small>'+esc(e.actor)+' · '+esc(dayTime(e.changed_at))+'</small></div>').join(''))+
+    '</div>'+
 
     '<div class="panel"><h3>Waiting for approval ('+a.reqs.length+')</h3>'+
     (a.reqs.length?a.reqs.map(r=>'<div class="row"><b>'+esc(r.full_name)+'</b><small>'+esc(r.email||'')+' · asked on '+day(r.created_at)+'</small>'+(r.about?'<small>“'+esc(r.about)+'”</small>':'')+

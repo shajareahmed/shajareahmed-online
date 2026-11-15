@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shajare Ahmed Online — Changelog</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ivory:#F6F1E1; --paper:#FFFDF6; --gold:#B8901F; --gold-hi:#E6CB72; --gold-deep:#7A5C10;
+    --ink:#3A2E14; --muted:#7C6F52; --line:#DCCB95;
+    --display:"Cinzel","Trajan Pro",Georgia,serif;
+    --text:"Nunito Sans",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ivory);color:var(--ink);font-family:var(--text);line-height:1.5}
+  header{padding:36px 20px 18px;text-align:center;border-bottom:1px solid var(--line);background:var(--paper)}
+  header h1{font-family:var(--display);font-weight:700;font-size:26px;letter-spacing:.04em;margin:0 0 6px;color:var(--gold-deep)}
+  header p{margin:0;color:var(--muted);font-size:14px}
+  main{max-width:720px;margin:0 auto;padding:28px 18px 60px}
+  .entry{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:18px;box-shadow:0 2px 6px rgba(122,92,16,.08)}
+  .entry .head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+  .entry .ver{font-family:var(--display);font-weight:700;color:var(--gold-deep);font-size:17px;letter-spacing:.03em}
+  .entry .date{color:var(--muted);font-size:12.5px}
+  .entry ul{margin:0;padding-inline-start:20px}
+  .entry li{margin:4px 0;font-size:14.5px}
+  .entry li.minor{color:var(--muted)}
+  .era{text-align:center;color:var(--muted);font-size:12.5px;margin:30px 0 14px;text-transform:uppercase;letter-spacing:.08em}
+  footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Shajare Ahmed Online</h1>
+  <p>What's changed, build by build. Newest first.</p>
+</header>
+<main>
+
+  <div class="entry">
+    <div class="head"><span class="ver">Ver P7XK</span><span class="date">15 Nov 2026</span></div>
+    <ul>
+      <li>New Admin "Activity log" panel — shows recent person edits and membership changes (who, what, when), pulled from the change history the database already keeps automatically. Admins and moderators only.</li>
+      <li>Added this changelog page, linked from the Admin page's version line.</li>
+      <li>"Discard Current Changes" (under Rearrange) now only shows up when there's something from the current session to discard.</li>
+    </ul>
+  </div>
+
+  <div class="entry">
+    <div class="head"><span class="ver">Ver N4QZ</span><span class="date">15 Nov 2026</span></div>
+    <ul>
+      <li>"Ref" renamed to "Ver" throughout.</li>
+      <li>A small "vXXXX" watermark now floats in the bottom-right corner of the tree canvas at all times.</li>
+      <li>The Admin page now shows the current version and when it was last updated.</li>
+    </ul>
+  </div>
+
+  <div class="entry">
+    <div class="head"><span class="ver">Ver D6HP</span><span class="date">15 Nov 2026</span></div>
+    <ul>
+      <li>Rearrange is now its own expandable section in the menu (like Custom Views), with three options: Rearrange Tiles / Exit Rearrange, Discard Current Changes, and Reset All Rearrangements.</li>
+      <li>Starting Rearrange Tiles closes the menu for a clear canvas; exiting commits what you moved.</li>
+    </ul>
+  </div>
+
+  <div class="entry">
+    <div class="head"><span class="ver">Ver W9BL</span><span class="date">15 Nov 2026</span></div>
+    <ul><li>Added a Reset control next to Rearrange, to clear every manual card position at once.</li></ul>
+  </div>
+
+  <div class="entry">
+    <div class="head"><span class="ver">Ver K2FY</span><span class="date">15 Nov 2026</span></div>
+    <ul>
+      <li>The collapse arrow for a child/sibling now sits above their card (toward the parent) instead of below.</li>
+      <li>Confirmed the spouse collapse arrow is gold/brown, pointing toward the partner when visible and outward once collapsed.</li>
+    </ul>
+  </div>
+
+  <div class="entry">
+    <div class="head"><span class="ver">Ver R5TQ</span><span class="date">15 Nov 2026</span></div>
+    <ul>
+      <li>New "Rearrange" mode: drag any card to move it and everyone below them — spouse, children, grandchildren — as one group. The connecting lines follow automatically.</li>
+      <li>Manual positions persist for the session and can be saved into a Custom View.</li>
+    </ul>
+  </div>
+
+  <div class="entry">
+    <div class="head"><span class="ver">Ver J8WN</span><span class="date">15 Nov 2026</span></div>
+    <ul>
+      <li>Widened the gap between spouse cards so the collapse arrow has proper room, and fixed it losing its gold outline when squeezed.</li>
+      <li>Collapsing a person's only spouse no longer hides their shared children — only her card disappears; multi-spouse collapsing (each wife's own children fold with her) was already correct and is unchanged.</li>
+    </ul>
+  </div>
+
+  <div class="entry">
+    <div class="head"><span class="ver">Ver V4RM</span><span class="date">15 Nov 2026</span></div>
+    <ul>
+      <li>Redesigned the Collapse control end to end: no more "+Name" pills — a single unlabeled gold arrow per relationship now lives on the anchor card in both states, flipping direction to collapse or restore.</li>
+      <li>Added an eye-icon toggle next to the hamburger menu to hide/show every collapse arrow at once, for a clean view.</li>
+    </ul>
+  </div>
+
+  <div class="era">Earlier builds</div>
+
+  <div class="entry">
+    <div class="head"><span class="ver">Ver P3WY</span></div>
+    <ul><li class="minor">Restyled the first version of the Collapse control to reuse the existing triangle-arrow look.</li></ul>
+  </div>
+  <div class="entry">
+    <div class="head"><span class="ver">Ver X6RT</span></div>
+    <ul><li class="minor">Added the permanent "Hidden People" feature — hide anyone from your view until you explicitly unhide them, from its own section in the menu.</li></ul>
+  </div>
+  <div class="entry">
+    <div class="head"><span class="ver">Ver Q9LZ</span></div>
+    <ul><li class="minor">First version of on-canvas Collapse, generalised to every relationship (not just spouses), downward and sideways.</li></ul>
+  </div>
+  <div class="entry">
+    <div class="head"><span class="ver">Ver H4PV</span></div>
+    <ul><li class="minor">Session-only collapse/expand, and persisted Custom Views (save, load, delete, up to 5 named views).</li></ul>
+  </div>
+
+  <p style="text-align:center;color:var(--muted);font-size:12.5px;margin-top:8px">Builds before this point aren't listed here.</p>
+
+</main>
+<footer>Shajare Ahmed Online — private family archive</footer>
+</body>
+</html>
