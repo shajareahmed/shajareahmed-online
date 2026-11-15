@@ -140,7 +140,7 @@ body.rearranging .node{cursor:move}
 .tog.collapse{min-width:22px;height:22px;padding:0;border-radius:50%}
 .tog.collapse.side{left:-25px;right:auto;bottom:auto;top:50%;transform:translateY(-50%);z-index:3;background:var(--paper);border:1.5px solid var(--gold);color:var(--gold-deep)}
 .tog.collapse.side::before{transform:rotate(-90deg)}
-.tog.collapse.offset{left:calc(50% - 34px)}
+.tog.collapse.open{bottom:auto;top:-24px}
 .restorerow{position:absolute;left:50%;top:calc(100% + 26px);transform:translateX(-50%);display:flex;flex-wrap:wrap;gap:8px;width:max-content;justify-content:center;z-index:2}
 .restorerow .tog{position:static;left:auto;right:auto;top:auto;bottom:auto;transform:none}
 .tog.collapse.ghost{z-index:3;background:var(--paper);border:1.5px solid var(--gold);color:var(--gold-deep)}
@@ -399,7 +399,7 @@ html[dir="rtl"] .step{margin:4px 0 6px 40px}
       <div class="acts" style="justify-content:center"><button class="btn pri" id="pcheck" type="button">Check again</button><button class="btn" id="out2" type="button">Sign out</button></div>
     </div>
     <p class="msg info" id="gatemsg">Opening the family archive…</p>
-    <p class="ver">Ref R5TQ</p>
+    <p class="ver">Ref K2FY</p>
   </div>
 </div>
 
@@ -1198,7 +1198,7 @@ function nodeHTML(id){
     (isSp&&!inTree(id)&&(p.par.length||siblings(id).length)?'<button class="tog side" data-side="1" aria-label="Show this side of the family" title="Show this side of the family"><svg viewBox="0 0 24 24"><path d="M4 8h15M15 4l4 4-4 4M20 16H5M9 12l-4 4 4 4"/></svg></button>':'')+
     (canCollapse?(t.sp
       ?'<button class="tog collapse side" data-collapse="'+esc(id)+'" aria-label="Collapse '+esc(first(id))+'" title="Collapse"></button>'
-      :'<button class="tog collapse open'+(n?' offset':'')+'" data-collapse="'+esc(id)+'" aria-label="Collapse '+esc(first(id))+'" title="Collapse"></button>'):'')+
+      :'<button class="tog collapse open" data-collapse="'+esc(id)+'" aria-label="Collapse '+esc(first(id))+'" title="Collapse"></button>'):'')+
     restorerow;
 }
 function syncEls(){
