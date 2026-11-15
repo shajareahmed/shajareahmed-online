@@ -57,7 +57,10 @@ button:disabled{opacity:.55;cursor:default}
 .bar{position:relative}
 .cbtn{margin-inline-start:auto;flex:none;border:1.5px solid var(--gold);background:var(--paper);color:var(--gold-deep);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:700;min-height:36px}
 .cbtn.on{background:linear-gradient(180deg,var(--gold-hi),var(--gold));border-color:var(--gold-deep);color:#fff}
-.out{flex:none;border:1px solid var(--line);background:none;border-radius:50%;width:36px;height:36px;font-size:18px;font-weight:700;color:var(--muted);line-height:1}
+.out{flex:none;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);background:none;border-radius:50%;width:36px;height:36px;color:var(--muted);line-height:1}
+.out svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.mview{display:none}
+@media (max-width:899px){#viewsw{display:none}.mview{display:block}}
 .menu{position:absolute;inset-inline-end:10px;top:calc(100% + 4px);z-index:30;background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 22px rgba(122,92,16,.2);display:flex;flex-direction:column;min-width:220px;overflow:hidden}
 .menu button{text-align:start;padding:12px 16px;border:0;border-bottom:1px solid var(--ivory);background:none;min-height:46px;font-weight:600}
 .node.sp{background:#FBF5E2}
@@ -367,7 +370,7 @@ html[dir="rtl"] .step{margin:4px 0 6px 40px}
       <div class="acts" style="justify-content:center"><button class="btn pri" id="pcheck" type="button">Check again</button><button class="btn" id="out2" type="button">Sign out</button></div>
     </div>
     <p class="msg info" id="gatemsg">Opening the family archive…</p>
-    <p class="ver">Ref W8KD</p>
+    <p class="ver">Ref T2VN</p>
   </div>
 </div>
 
@@ -381,8 +384,11 @@ html[dir="rtl"] .step{margin:4px 0 6px 40px}
     <button type="button" data-view="list">List</button>
   </div>
   <button class="cbtn" id="contrib" type="button" aria-pressed="false">Contribute</button>
-  <button class="out" id="menu" type="button" aria-label="Menu">⋯</button>
+  <button class="out" id="menu" type="button" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
   <div class="menu" id="menupop" hidden>
+    <button class="mview" type="button" data-view="tree">Family Tree</button>
+    <button class="mview" type="button" data-view="focus">My Focus</button>
+    <button class="mview" type="button" data-view="list">List</button>
     <button id="mcal" type="button">Family Calendar</button>
     <button id="mfeedback" type="button">Send feedback</button>
     <button id="mmembers" type="button" hidden>Admin</button>
@@ -1311,6 +1317,7 @@ function setContrib(on,quiet){
 }
 $('contrib').addEventListener('click',()=>setContrib(!contrib));
 $('menu').addEventListener('click',e=>{e.stopPropagation();$('menupop').hidden=!$('menupop').hidden;$('viewpop').hidden=true});
+$('menupop').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(!b)return;$('menupop').hidden=true;setView(b.dataset.view)});
 document.addEventListener('click',()=>{$('menupop').hidden=true;$('viewpop').hidden=true});
 for(const id of ['lang1','mlang']){const b=$(id);b.textContent=LANG==='ur'?'English':'اردو';b.lang=LANG==='ur'?'en':'ur';b.addEventListener('click',()=>setLang(LANG==='ur'?'en':'ur'))}
 /* ---------- Admin page (moderators and admin) ---------- */
